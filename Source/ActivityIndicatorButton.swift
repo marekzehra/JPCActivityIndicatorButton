@@ -116,7 +116,7 @@ public class ActivityIndicatorButton: UIControl {
                 showOutline = true
                 showProgress = false
             case .Spinning:
-                showProgress = false
+                showOutline = false
                 showProgress = true
             case .Progress:
                 showOutline = true
@@ -138,13 +138,18 @@ public class ActivityIndicatorButton: UIControl {
         var nextValues = configForState(_activityState)
         var prevValues = configForState(prevState)
         
-        
+        // Edge case: Paused state never modifies values
+        if _activityState == .Paused {
+            nextValues.showOutline = prevValues.showOutline
+            nextValues.showProgress = prevValues.showProgress
+        }
         
         
         
         func getNextImageView() -> UIImageView? {
             if let nextImage = nextValues.nextImage {
                 let theImageView = UIImageView(image: nextImage)
+                theImageView.tintColor = self.tintColor
                 
                 self.addSubview(theImageView)
                 self.sendSubviewToBack(theImageView)
@@ -159,8 +164,8 @@ public class ActivityIndicatorButton: UIControl {
         }
         
         struct OpacityAnimation {
-            let toValue: CGFloat
-            let fromValue: CGFloat
+            let toValue: Float
+            let fromValue: Float
             
             init(hidden: Bool) {
                 self.toValue = hidden ? 0.0 : 1.0
@@ -173,6 +178,8 @@ public class ActivityIndicatorButton: UIControl {
                 opacityanim.fromValue = self.fromValue
                 opacityanim.duration = duration
                 layer.addAnimation(opacityanim, forKey: "opacity")
+                
+                layer.opacity = self.toValue
             }
         }
         
@@ -213,14 +220,12 @@ public class ActivityIndicatorButton: UIControl {
             if animated {
                 
                 nextImageView?.alpha = 0.0
-                nextImageView?.transform = CGAffineTransformMakeRotation(CGFloat(-M_PI_2))
                 UIView.animateWithDuration(self.animationDuration, delay: 0.0, usingSpringWithDamping: 0.9, initialSpringVelocity: 0.0, options: UIViewAnimationOptions.allZeros, animations: { () -> Void in
                     
-                    print("Animating Image")
                     self.imageView?.transform = CGAffineTransformMakeRotation(CGFloat(M_PI_2))
                     self.imageView?.alpha = 0.0
                     
-                    nextImageView?.transform = CGAffineTransformMakeRotation(CGFloat(M_PI_2))
+                    nextImageView?.transform = CGAffineTransformRotate(CGAffineTransformMakeRotation(CGFloat(-M_PI_2)), CGFloat(M_PI_2))
                     nextImageView?.alpha = 1.0
                     
                 }, completion: completion)
@@ -235,11 +240,11 @@ public class ActivityIndicatorButton: UIControl {
         self.updateProgress(fromValue: 0.0, animated: animated)
     }
     
-    private var _progress: CGFloat = 0.0
+    private var _progress: Float = 0.0
     
     /// A float between 0.0 and 1.0 specifying the progress amount in the Progress state. This is displayed clockwise where 1.0 fills the whole circle. Equivalent to calling setProgress(animated: false).
     /// :see: setProgress(animated:)
-    public var progress: CGFloat {
+    public var progress: Float {
         get {
             return _progress
         }
@@ -256,14 +261,14 @@ public class ActivityIndicatorButton: UIControl {
     
     :see: progress
     */
-    public func setProgress(progress: CGFloat, animated: Bool) {
+    public func setProgress(progress: Float, animated: Bool) {
         let prevValue = _progress
         _progress = progress
         
         updateProgress(fromValue: prevValue, animated: animated)
     }
     
-    private func updateProgress(fromValue prevValue: CGFloat, animated: Bool) {
+    private func updateProgress(fromValue prevValue: Float, animated: Bool) {
         if activityState == .Progress {
             
             let anim = CABasicAnimation(keyPath: "strokeEnd")
@@ -272,30 +277,109 @@ public class ActivityIndicatorButton: UIControl {
             anim.duration = 0.2
             self.progressLayer.addAnimation(anim, forKey: "progress")
             
-            self.progressLayer.strokeEnd = _progress
+            self.progressLayer.strokeEnd = CGFloat(_progress)
         }
     }
     
     private func updateSpinningAnimation() {
         
-        let kStrokeEndAnim = "spinning_strokeEnd"
+        let kStrokeAnim = "spinning_stroke"
         let kRotationAnim = "spinning_rotation"
         
-        self.progressLayer.removeAnimationForKey(kStrokeEndAnim)
+        self.progressLayer.removeAnimationForKey(kStrokeAnim)
         self.progressLayer.removeAnimationForKey(kRotationAnim)
         if activityState == .Spinning {
          
-            let strokeEndAnim = CABasicAnimation(keyPath: "strokeEnd")
-            strokeEndAnim.fromValue = 0.0
-            strokeEndAnim.toValue = 1.0
-            strokeEndAnim.duration = 1.0
             
-            let rotationAnim = CABasicAnimation(keyPath: "transform")
-            rotationAnim.fromValue = NSValue(CATransform3D: CATransform3DIdentity)
-            rotationAnim.toValue = NSValue(CATransform3D: CATransform3DMakeAffineTransform(CGAffineTransformMakeRotation(CGFloat(2*M_PI))))
-            rotationAnim.duration = 1.5
+            // TODO: Clean this up
+            let stage1Time = 0.9
+            let pause1Time = 0.05
+            let stage2Time = 0.6
+            let pause2Time = 0.05
+            let stage3Time = 0.1
             
-            self.progressLayer.addAnimation(strokeEndAnim, forKey: kStrokeEndAnim)
+            var animationTime = stage1Time
+            
+            let headStage1 = CABasicAnimation(keyPath: "strokeStart")
+            headStage1.fromValue = 0.0
+            headStage1.toValue = 0.25
+            headStage1.duration = animationTime
+            
+            let tailStage1 = CABasicAnimation(keyPath: "strokeEnd")
+            tailStage1.fromValue = 0.0
+            tailStage1.toValue = 1.0
+            tailStage1.duration = animationTime
+            
+            
+            let headPause1 = CABasicAnimation(keyPath: "strokeStart")
+            headPause1.fromValue = 0.25
+            headPause1.toValue = 0.25
+            headPause1.beginTime = animationTime
+            headPause1.duration = pause1Time
+            
+            let tailPause1 = CABasicAnimation(keyPath: "strokeEnd")
+            tailPause1.fromValue = 1.0
+            tailPause1.toValue = 1.0
+            tailPause1.beginTime = animationTime
+            tailPause1.duration = pause1Time
+            
+            animationTime += pause1Time
+            
+            let headStage2 = CABasicAnimation(keyPath: "strokeStart")
+            headStage2.fromValue = 0.25
+            headStage2.toValue = 0.9
+            headStage2.beginTime = animationTime
+            headStage2.duration = stage2Time
+            
+            let tailStage2 = CABasicAnimation(keyPath: "strokeEnd")
+            tailStage2.fromValue = 1.0
+            tailStage2.toValue = 1.0
+            tailStage2.beginTime = animationTime
+            tailStage2.duration = stage2Time
+            
+            animationTime += stage2Time
+            
+            let headPause2 = CABasicAnimation(keyPath: "strokeStart")
+            headPause2.fromValue = 0.9
+            headPause2.toValue = 0.9
+            headPause2.beginTime = animationTime
+            headPause2.duration = pause2Time
+            
+            let tailPause2 = CABasicAnimation(keyPath: "strokeEnd")
+            tailPause2.fromValue = 1.0
+            tailPause2.toValue = 1.0
+            tailPause2.beginTime = animationTime
+            tailPause2.duration = pause2Time
+            
+            animationTime += pause2Time
+            
+            let headStage3 = CABasicAnimation(keyPath: "strokeStart")
+            headStage3.fromValue = 0.9
+            headStage3.toValue = 1.0
+            headStage3.beginTime = animationTime
+            headStage3.duration = stage3Time
+            
+            let tailStage3 = CABasicAnimation(keyPath: "strokeEnd")
+            tailStage3.fromValue = 1.0
+            tailStage3.toValue = 1.0
+            tailStage3.beginTime = animationTime
+            tailStage3.duration = stage3Time
+            
+            animationTime += stage3Time
+            
+            let group = CAAnimationGroup()
+            group.repeatCount = Float.infinity
+            group.duration = animationTime
+            group.animations = [headStage1, tailStage1, headPause1, tailPause1, headStage2, tailStage2, headPause2, tailPause2, headStage3, tailStage3]
+            
+            self.progressLayer.addAnimation(group, forKey: kStrokeAnim)
+            
+            let rotationAnim = CABasicAnimation(keyPath: "transform.rotation")
+            rotationAnim.fromValue = 0
+            rotationAnim.toValue = 2 * M_PI
+            rotationAnim.duration = 3.0
+            rotationAnim.repeatCount = Float.infinity
+            
             self.progressLayer.addAnimation(rotationAnim, forKey: kRotationAnim)
         }
     }
@@ -392,6 +476,7 @@ public class ActivityIndicatorButton: UIControl {
     /// View containing the layers. Makes it easier to keep the layers in the right zOrder.
     private lazy var activityContainerView: UIView = {
         let view = UIView()
+        view.setTranslatesAutoresizingMaskIntoConstraints(false)
         view.backgroundColor = UIColor.clearColor()
         return view
     }()
@@ -427,9 +512,11 @@ public class ActivityIndicatorButton: UIControl {
         
         progressLayer.strokeColor = color
         progressLayer.fillColor = clear
+        progressLayer.lineWidth = 2.5
         
         outlineLayer.strokeColor = color
         outlineLayer.fillColor = clear
+        outlineLayer.lineWidth = 1.0
     }
 
     
@@ -443,7 +530,6 @@ public class ActivityIndicatorButton: UIControl {
     Should be called once and only once. Adds layers to view heirarchy.
     */
     private func initialLayoutSetup() {
-        println("Doing initial setup")
         
         self.addSubview(activityContainerView)
         
@@ -466,11 +552,15 @@ public class ActivityIndicatorButton: UIControl {
         // Get the rect in which we will draw the oval for the activity indicator
         // In the case our bounds are not a square, square off to the minimum direction so that our oval is always a circle
         // And obviously lets make it centered
-        let frame = activityContainerView.frame
-        let minDim = min(frame.width, frame.height)
-        let centeredFrame = CGRectInset(frame, minDim - frame.width, minDim - frame.height)
+        let frame = activityContainerView.bounds
         
-        let path = UIBezierPath(ovalInRect: centeredFrame).CGPath
+        self.outlineLayer.frame = frame
+        self.progressLayer.frame = frame
+        
+        let center = CGPointMake(CGRectGetMidX(frame), CGRectGetMidY(frame))
+        let radius = min(frame.width, frame.height) * 0.5
+        
+        let path = UIBezierPath(arcCenter: center, radius: radius, startAngle: CGFloat(-M_PI_2), endAngle: CGFloat(3 * M_PI_2), clockwise: true).CGPath
         
         outlineLayer.path = path
         progressLayer.path = path

@@ -10,16 +10,39 @@ import UIKit
 
 class ViewController: UIViewController {
 
+    @IBOutlet var activityIndicator: ActivityIndicatorButton!
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-        // Do any additional setup after loading the view, typically from a nib.
+        
+        
+    }
+    
+    @IBAction func activityButtonTapped(sender: AnyObject) {
+        println("Activity Button Tapped")
     }
 
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
+    @IBAction func stateValueChanged(sender: UISegmentedControl) {
+        
+        var newState: ActivityIndicatorButton.ActivityState!
+        switch sender.selectedSegmentIndex {
+        case 0:
+            newState = .Inactive
+        case 1:
+            newState = .Spinning
+        case 2:
+            newState = .Progress
+        case 3:
+            newState = .Paused
+        default:
+            newState = .Complete
+        }
+        
+        activityIndicator.transition(toActivityState: newState, animated: true)
     }
-
-
+    
+    @IBAction func progressValueChanged(sender: UISlider) {
+        activityIndicator.progress = sender.value
+    }
 }
 
