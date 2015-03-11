@@ -15,7 +15,8 @@ class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        
+        self.activityIndicator.tintControlBackground = true
+        self.activityIndicator.setTintColor(UIColor(red: 0.298, green: 0.686, blue: 0.314, alpha: 1.0), forActivityStates: [ActivityIndicatorButton.ActivityState.Complete])
     }
     
     @IBAction func activityButtonTapped(sender: AnyObject) {
