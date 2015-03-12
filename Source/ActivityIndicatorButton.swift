@@ -61,7 +61,7 @@ public class ActivityIndicatorButton: UIControl {
     
     private func commonInit() {
         initialLayoutSetup()
-        updateColors()
+        updateAllColors()
         updateForCurrentStyle(previousState: nil, animated: false)
     }
     
@@ -71,7 +71,7 @@ public class ActivityIndicatorButton: UIControl {
     
     // MARK: - Configuration
     
-    public let animationDuration: CFTimeInterval = 0.3
+    public let animationDuration: CFTimeInterval = 0.2
     
     private var _activityState: ActivityState = .Inactive
     
@@ -110,30 +110,30 @@ public class ActivityIndicatorButton: UIControl {
     private func updateForCurrentStyle(previousState prevState: ActivityState?, animated: Bool) {
         
         
-        func configForState(state: ActivityState) -> (showOutline: Bool, showProgress: Bool, nextImage: UIImage?) {
+        func configForState(state: ActivityState) -> (showTrack: Bool, showProgress: Bool, image: UIImage?) {
             
-            var showOutline = false
+            var showTrack = false
             var showProgress = false
-            var nextImage = self.image(forActivityState: state)
+            let image = self.image(forActivityState: state)
             
             switch state {
             case .Inactive:
-                showOutline = true
+                showTrack = true
                 showProgress = false
             case .Spinning:
-                showOutline = false
+                showTrack = false
                 showProgress = true
             case .Progress:
-                showOutline = true
+                showTrack = true
                 showProgress = true
             case .Paused:
                 break
             case .Complete:
-                showOutline = true
+                showTrack = true
                 showProgress = false
             }
             
-            return (showOutline, showProgress, nextImage)
+            return (showTrack, showProgress, image)
         }
         
         
@@ -141,11 +141,11 @@ public class ActivityIndicatorButton: UIControl {
         
         
         var nextValues = configForState(_activityState)
-        var prevValues = prevState != nil ? configForState(prevState!) : (showOutline: !nextValues.showOutline, showProgress: !nextValues.showProgress, nextImage: nil)
+        var prevValues = prevState != nil ? configForState(prevState!) : (showTrack: !nextValues.showTrack, showProgress: !nextValues.showProgress, image: nil)
         
         // Edge case: Paused state never modifies values
         if _activityState == .Paused {
-            nextValues.showOutline = prevValues.showOutline
+            nextValues.showTrack = prevValues.showTrack
             nextValues.showProgress = prevValues.showProgress
         }
         
@@ -167,123 +167,155 @@ public class ActivityIndicatorButton: UIControl {
                 opacityanim.duration = duration
                 layer.addAnimation(opacityanim, forKey: "opacity")
                 
-                self.finish(layer)
-            }
-            
-            func finish(layer: CALayer) {
                 layer.opacity = toValue
             }
-        }
-        
-        
-        
-        
-        var outlineOpacity: OpacityAnimation?
-        var progressOpacity: OpacityAnimation?
-        
-        if prevValues.showOutline != nextValues.showOutline {
-            outlineOpacity = OpacityAnimation(hidden: !nextValues.showOutline)
-        }
-        if prevValues.showProgress != nextValues.showProgress {
-            progressOpacity = OpacityAnimation(hidden: !nextValues.showProgress)
-        }
-        var shouldAnimateImage = animated && prevValues.nextImage != nextValues.nextImage
-        
-        
-        
-        
-        if animated {
             
-            outlineOpacity?.addToLayer(self.outlineLayer, duration: self.animationDuration)
-            progressOpacity?.addToLayer(self.progressLayer, duration: self.animationDuration)
+            func setNoAnimation(layer: CALayer) {
+                CATransaction.begin()
+                CATransaction.setValue(kCFBooleanTrue, forKey: kCATransactionDisableActions)
+                layer.opacity = toValue
+                CATransaction.commit()
+            }
+        }
+        
+        
+        
+        struct ScaleAnimation {
+            var isExpand: Bool = false
+            
+            var completion: (() -> Void)?
+            
+            init() {
+                
+            }
+            
+            init(isExpand: Bool) {
+                self.isExpand = isExpand
+            }
+            
+            func addToLayer(layer: CAShapeLayer, duration: CFTimeInterval){
+                
+                let currentPath = layer.path
+                let bounds = CGPathGetPathBoundingBox(currentPath)
+                let center = CGPointMake(CGRectGetMidX(bounds), CGRectGetMidY(bounds))
+                let compressed = UIBezierPath(arcCenter: center, radius: 0.0, startAngle: 0.0, endAngle: CGFloat(M_PI * 2), clockwise: true).CGPath
+                
+                CATransaction.begin()
+                
+                if let handler = completion {
+                    CATransaction.setCompletionBlock(handler)
+                }
+                let anim = CABasicAnimation(keyPath: "path")
+                anim.fromValue = isExpand ? compressed : currentPath
+                anim.toValue = isExpand ? currentPath : compressed
+                anim.duration = duration
+                
+                layer.addAnimation(anim, forKey: "path_scale")
+                
+                CATransaction.commit()
+            }
+            
+        }
+        
+        
+        
+        
+        var trackOpacity = OpacityAnimation(hidden: !nextValues.showTrack)
+        var progressOpacity = OpacityAnimation(hidden: !nextValues.showProgress)
+        
+        let shouldAnimateTrack = animated && prevValues.showTrack != nextValues.showTrack
+        let shouldAnimateProgressBar = animated && prevValues.showProgress != nextValues.showProgress
+        let shouldAnimateImage = animated && prevValues.image != nextValues.image
+        
+        
+        
+        if shouldAnimateTrack {
+            
+            let bounds = self.activityContainerView.bounds
+            let center = CGPointMake(CGRectGetMidX(bounds), CGRectGetMidY(bounds))
+            let compressed = UIBezierPath(arcCenter: center, radius: 0.0, startAngle: 0.0, endAngle: CGFloat(M_PI * 2), clockwise: true).CGPath
+            let expanded = UIBezierPath(ovalInRect: bounds).CGPath
+            
+            // Expand
+            if nextValues.showTrack && prevValues.image == nil {
+                
+                trackOpacity.setNoAnimation(self.trackLayer)
+                ScaleAnimation(isExpand: true).addToLayer(self.trackLayer, duration: self.animationDuration)
+            }
+            // Collapse
+            else if !nextValues.showTrack && nextValues.image == nil {
+                
+                trackOpacity.setNoAnimation(self.trackLayer)
+                ScaleAnimation(isExpand: false).addToLayer(self.trackLayer, duration: self.animationDuration)
+            }
+            // Fade track
+            else {
+                trackOpacity.addToLayer(self.trackLayer, duration: self.animationDuration)
+            }
         }
         else {
-            CATransaction.begin()
-            CATransaction.setValue(kCFBooleanTrue, forKey: kCATransactionDisableActions)
-            outlineOpacity?.finish(self.outlineLayer)
-            progressOpacity?.finish(self.progressLayer)
-            CATransaction.commit()
+            trackOpacity.setNoAnimation(self.trackLayer)
         }
+        
+        if shouldAnimateProgressBar {
+            progressOpacity.addToLayer(self.progressLayer, duration: self.animationDuration)
+        }
+        else {
+            progressOpacity.setNoAnimation(self.progressLayer)
+        }
+        
         
         
         let nextButtonView = self.centerButtonView
-        self.centerButtonView.imageView.image = nextValues.nextImage
+        self.centerButtonView.setImage(nextValues.image)
         
         
         // If image has changed and we're animating...
         if shouldAnimateImage {
             
-            let duration = self.animationDuration
-            let animationKey = "image"
+            var anim = ScaleAnimation()
             
-            let bounds = nextButtonView.containerView.bounds
-            let center = CGPointMake(CGRectGetMidX(bounds), CGRectGetMidY(bounds))
-            let compressed = UIBezierPath(arcCenter: center, radius: 0.0, startAngle: 0.0, endAngle: CGFloat(M_PI * 2), clockwise: true).CGPath
-            let expanded = UIBezierPath(ovalInRect: bounds).CGPath
-            
-            // We're going to a nil image. Animate away the old one
-            if nextValues.nextImage == nil {
+            // Collaspe old image
+            if nextValues.image == nil {
                 
                 let completion = { () -> Void in
-                    self.updateColors()
+                    self.updateAllColors()
                 }
                 
-                CATransaction.begin()
-                
-                CATransaction.setCompletionBlock(completion)
-                
-                let expandNewButton = CABasicAnimation(keyPath: "path")
-                expandNewButton.fromValue = expanded
-                expandNewButton.toValue = compressed
-                expandNewButton.duration = duration
-                
-                nextButtonView.containerView.layer.mask.addAnimation(expandNewButton, forKey: animationKey)
-                
-                CATransaction.commit()
+                anim.isExpand = false
+                anim.completion = completion
+                anim.addToLayer(nextButtonView.mask, duration: self.animationDuration)
             }
             else {
                 
-                func prepareAnimationBackground(color: UIColor) {
-                    CATransaction.begin()
-                    CATransaction.setValue(kCFBooleanTrue, forKey: kCATransactionDisableActions)
-                    self.outlineLayer.fillColor = color.CGColor
-                    CATransaction.commit()
-                }
+                let tempBackgroundLayer = CAShapeLayer()
+                tempBackgroundLayer.path = self.trackLayer.path
                 
-                nextButtonView.updateColors(self.tintColorForActivityState(self.activityState), tintBackground: self.tintControlBackground)
+                self.updateButtonColors()
                 
+                // TODO: Add animation backing layer
                 if let prevState = prevState {
                     CATransaction.begin()
                     CATransaction.setValue(kCFBooleanTrue, forKey: kCATransactionDisableActions)
-                    self.outlineLayer.fillColor = (self.tintControlBackground && prevValues.nextImage != nil ? self.tintColorForActivityState(prevState) : UIColor.clearColor()).CGColor
+                    tempBackgroundLayer.fillColor = (self.useSolidColorButtons && prevValues.image != nil ? self.tintColorForActivityState(prevState) : UIColor.clearColor()).CGColor
                     CATransaction.commit()
+                    
+                    self.layer.insertSublayer(tempBackgroundLayer, atIndex: 0)
                 }
                 
                 let completion = { () -> Void in
-                    CATransaction.begin()
-                    CATransaction.setValue(kCFBooleanTrue, forKey: kCATransactionDisableActions)
-                    self.outlineLayer.fillColor = UIColor.clearColor().CGColor
-                    CATransaction.commit()
-                    self.updateColors()
+                    tempBackgroundLayer.removeFromSuperlayer()
+                    self.updateAllColors()
                 }
                 
-                CATransaction.begin()
-                
-                CATransaction.setCompletionBlock(completion)
-                
-                let expandNewButton = CABasicAnimation(keyPath: "path")
-                expandNewButton.fromValue = compressed
-                expandNewButton.toValue = expanded
-                expandNewButton.duration = duration
-                
-                nextButtonView.containerView.layer.mask.addAnimation(expandNewButton, forKey: animationKey)
-                
-                CATransaction.commit()
+                anim.isExpand = true
+                anim.completion = completion
+                anim.addToLayer(nextButtonView.mask, duration: self.animationDuration)
             }
             
         }
         else {
-            updateColors()
+            updateAllColors()
         }
         
         self.updateSpinningAnimation()
@@ -440,31 +472,46 @@ public class ActivityIndicatorButton: UIControl {
     // MARK: - Configuration
     
     
+    // MARK: Colors
+    
+    
+    /// The color of the drop shadow or UIColor.clearColor() if you do not wish to display a shadow. The shadow never drawn is useSolidColorButtons is false.
+    /// :see: useSolidColorButtons
+    @IBInspectable public var shadowColor = UIColor.blackColor()
+    
+    
+    /// The color of the touch down and touch up ripple animation. Default value is UIColor.grayColor().colorWithAlphaComponent(0.25).
+    @IBInspectable public var hitAnimationColor = UIColor.grayColor().colorWithAlphaComponent(0.25)
+    
+    
     /// If true the circular background of this control is colored with the tint color and the image is colored white. Otherwise the background is clear and the image is tinted. Image color is only adjusted if it is a template image.
-    @IBInspectable public var tintControlBackground: Bool = false {
+    @IBInspectable public var useSolidColorButtons: Bool = false {
         didSet {
-            self.updateColors()
+            self.updateAllColors()
         }
     }
     
-    /// Overrides the tintColor property for the current state. 
-    /// :see: setTintColorForActivityState
-    @IBInspectable public var tintColorForActivityState: UIColor {
-        get {
-            return self.tintColorForActivityState(self.activityState)
-        }
-        set {
-            self.setTintColor(newValue, forActivityStates: [self.activityState])
-        }
-    }
-    
+    /// Data backing for setTintColor(forActivityState:)
     private var tintColorsByState = [ActivityState : UIColor]()
     
+    /**
+    Get the tint color used for an activity state. If a custom color is not set for the state the tint color of this control is returned
+    
+    :param: state The activity state
+    
+    :returns: The tint color for the activity state
+    */
     public func tintColorForActivityState(state: ActivityState) -> UIColor {
         let color = self.tintColorsByState[state]
         return color == nil ? self.tintColor : color
     }
     
+    /**
+    Supercede the tintColor property of this control with another value for specific states
+    
+    :param: color  The tint color or nil to use the default tintColor property on this control
+    :param: states A list of activity states
+    */
     public func setTintColor(color: UIColor?, forActivityStates states: [ActivityState]) {
         for aState in states {
             if let color = color {
@@ -477,11 +524,277 @@ public class ActivityIndicatorButton: UIControl {
     }
     
     
-    /// Add an image to the center of the control for all Styles. If an image is set for any of the other styles it will override this one while in that style. Template image are colored with this controls tint color. If highlighted image is provided it will be show while this control is in the "highlighted" state.
-    @IBInspectable public var image: UIImage?
+    private var trackColorByState = [ActivityState : UIColor]()
+    
+    /**
+    Get the trackColor for an activity state
+    
+    :param: state The activity state
+    
+    :returns: The trackColor or the tintColor for that state is a trackColor doesn't not exist
+    */
+    public func trackColor(forActivityState state: ActivityState) -> UIColor {
+        if let color = trackColorByState[state] {
+            return color
+        }
+        return self.tintColorForActivityState(state)
+    }
+    
+    /**
+    Set a trackColor for activity states. If nil will use the tintColor for that state
+    
+    :param: color  The trackColor or nil to use the tintColor
+    :param: states A list of states
+    */
+    public func setTrackColor(color: UIColor?, forActivityStates states: [ActivityState]) {
+        for aState in states {
+            if let color = color {
+                self.trackColorByState[aState] = color
+            }
+            else {
+                self.trackColorByState.removeValueForKey(aState)
+            }
+        }
+    }
     
     
-    /// Image for the Inactive style. 
+    
+    
+    // MARK: Images
+    
+    /// Data backing for setImage(forActivityState:)
+    private var imagesByActivityState = [ActivityState : UIImage]()
+    
+    /**
+    Set an image for a set of control states
+    
+    :param: image  The image for the control state or nil for no image
+    :param: states An array of control states. Use ActivityState.allValues to apply the change for all
+    */
+    public func setImage(image: UIImage?, forActivityStates states: [ActivityState]) {
+        for aState in states {
+            if let image = image {
+                imagesByActivityState[aState] = image
+            }
+            else {
+                imagesByActivityState.removeValueForKey(aState)
+            }
+        }
+        self.updateForCurrentStyle(previousState: nil, animated: false)
+    }
+    
+    /**
+    Get the image for an activity state
+    
+    :param: state The activity state
+    
+    :returns: The image that is used for the activity state or nil if no image
+    */
+    public func image(forActivityState state: ActivityState) -> UIImage? {
+        return imagesByActivityState[state]
+    }
+    
+    
+    
+    
+    
+    
+    // MARK: - UI (Private)
+    
+    
+    private class ButtonView {
+    
+        let containerView = UIView()
+        var imageView = UIImageView()
+        let mask = CAShapeLayer()
+        
+        init() {
+            
+            containerView.setTranslatesAutoresizingMaskIntoConstraints(false)
+            imageView.setTranslatesAutoresizingMaskIntoConstraints(false)
+            
+            containerView.addSubview(imageView)
+            containerView.addConstraint(NSLayoutConstraint(item: imageView, attribute: .CenterX, relatedBy: .Equal, toItem: containerView, attribute: .CenterX, multiplier: 1.0, constant: 0.0))
+            containerView.addConstraint(NSLayoutConstraint(item: imageView, attribute: .CenterY, relatedBy: .Equal, toItem: containerView, attribute: .CenterY, multiplier: 1.0, constant: 0.0))
+            
+            mask.fillColor = UIColor.whiteColor().CGColor
+            containerView.layer.mask = mask
+            
+            imageView.userInteractionEnabled = false
+            containerView.userInteractionEnabled = false
+        }
+        
+        func setImage(image: UIImage?) {
+            self.imageView.image = image
+            self.imageView.sizeToFit()
+        }
+        
+    }
+    
+    
+    /// Used to display the image
+    private lazy var centerButtonView = ButtonView()
+    
+    /// View containing the layers. Makes it easier to keep the layers in the right zOrder.
+    private lazy var activityContainerView: UIView = {
+        let view = UIView()
+        view.setTranslatesAutoresizingMaskIntoConstraints(false)
+        view.backgroundColor = UIColor.clearColor()
+        view.userInteractionEnabled = false
+        return view
+    }()
+    
+    /// The spinning activity indicator
+    private lazy var progressLayer: CAShapeLayer = CAShapeLayer()
+    
+    /// The outline around the progressLayer when state is Normal or Progress
+    private lazy var trackLayer: CAShapeLayer = CAShapeLayer()
+    
+    
+    
+    
+    
+    
+    // MARK: - Theming
+    
+    override public func tintColorDidChange() {
+        super.tintColorDidChange()
+        
+        updateAllColors()
+    }
+    
+    private func updateButtonColors() {
+        let color = self.tintColorForActivityState(self.activityState)
+        let tintColor = self.centerButtonView.imageView.image == nil ? UIColor.clearColor() : color
+        
+        if self.useSolidColorButtons {
+            self.centerButtonView.containerView.backgroundColor = tintColor
+            self.centerButtonView.imageView.tintColor = UIColor.whiteColor()
+        }
+        else {
+            self.centerButtonView.containerView.backgroundColor = UIColor.clearColor()
+            self.centerButtonView.imageView.tintColor = tintColor
+        }
+        
+    }
+    
+    private func updateTrackColors() {
+        let color = self.tintColorForActivityState(self.activityState).CGColor
+        let clear = UIColor.clearColor().CGColor
+        
+        progressLayer.strokeColor = color
+        progressLayer.fillColor = clear
+        progressLayer.lineWidth = 2.5
+        
+        trackLayer.strokeColor = color
+        trackLayer.fillColor = clear
+        trackLayer.lineWidth = 1.0
+    }
+    
+    private func updateAllColors() {
+        self.updateButtonColors()
+        self.updateTrackColors()
+    }
+
+    
+    
+    
+    
+    
+    // MARK: - Layout
+    
+    
+    let outlineWidth: CGFloat = 1.0
+    let progressWidth: CGFloat = 2.0
+    let imagePadding: CGFloat = 5.0
+    
+    
+    /**
+    Should be called once and only once. Adds layers to view heirarchy.
+    */
+    private func initialLayoutSetup() {
+        
+        self.addSubview(activityContainerView)
+        
+        let views = ["view" : activityContainerView, "button" : self.centerButtonView.containerView]
+        self.addConstraints(NSLayoutConstraint.constraintsWithVisualFormat("H:|[view]|", options: NSLayoutFormatOptions.allZeros, metrics: nil, views: views))
+        self.addConstraints(NSLayoutConstraint.constraintsWithVisualFormat("V:|[view]|", options: NSLayoutFormatOptions.allZeros, metrics: nil, views: views))
+        
+        let superlayer = activityContainerView.layer
+        superlayer.addSublayer(trackLayer)
+        superlayer.insertSublayer(progressLayer, above: trackLayer)
+        
+        self.addSubview(self.centerButtonView.containerView)
+        self.bringSubviewToFront(self.centerButtonView.containerView)
+        
+        let metrics = ["PAD" : self.outlineWidth + self.progressWidth]
+        
+        self.addConstraints(NSLayoutConstraint.constraintsWithVisualFormat("H:|-(PAD)-[button]-(PAD)-|", options: NSLayoutFormatOptions.allZeros, metrics: metrics, views: views))
+        self.addConstraints(NSLayoutConstraint.constraintsWithVisualFormat("V:|-(PAD)-[button]-(PAD)-|", options: NSLayoutFormatOptions.allZeros, metrics: metrics, views: views))
+    }
+    
+    
+    /**
+    Should be called when bounds change to update paths of shape layers.
+    */
+    private func updateForCurrentBounds() {
+        
+        // Get the rect in which we will draw the oval for the activity indicator
+        // In the case our bounds are not a square, square off to the minimum direction so that our oval is always a circle
+        // And obviously lets make it centered
+        let frame = self.bounds
+        
+        self.trackLayer.frame = frame
+        self.progressLayer.frame = frame
+        
+        let center = CGPointMake(CGRectGetMidX(frame), CGRectGetMidY(frame))
+        let radius = min(frame.width, frame.height) * 0.5
+        let start = CGFloat(-M_PI_2)  // Start angle is pointing directly upwards on the screen. This is where progress animations will begin
+        let end = CGFloat(3 * M_PI_2)
+        
+        trackLayer.path = UIBezierPath(arcCenter: center, radius: radius - self.progressWidth - self.outlineWidth * 0.5, startAngle: start, endAngle: end, clockwise: true).CGPath
+        progressLayer.path = UIBezierPath(arcCenter: center, radius: radius - self.progressWidth * 0.5, startAngle: start, endAngle: end, clockwise: true).CGPath
+        
+        let buttonMask = UIBezierPath(ovalInRect: self.centerButtonView.containerView.bounds).CGPath
+        self.centerButtonView.mask.path = buttonMask
+    }
+    
+    public override func layoutSubviews() {
+        super.layoutSubviews()
+        
+        updateForCurrentBounds()
+    }
+    
+    /// The intrinsicContentSize if no images are provided. If images are provided this is the intrinsicContentSize.
+    public let defaultContentSize: CGSize = CGSizeMake(35.0, 35.0)
+    
+    public override func intrinsicContentSize() -> CGSize {
+        var maxW: CGFloat = self.defaultContentSize.width
+        var maxH: CGFloat = self.defaultContentSize.height
+        
+        let totalImagePadding = 2 * (self.outlineWidth + self.progressWidth + self.imagePadding)
+        
+        let allImages = [inactiveImage, spinningImage, progressImage, pausedImage, completeImage]
+        
+        for anImage in allImages {
+            if let size = anImage?.size {
+                maxW = max(maxW, size.width + totalImagePadding)
+                maxH = max(maxH, size.height + totalImagePadding)
+            }
+        }
+        
+        return CGSizeMake(maxW, maxH)
+    }
+    
+    
+    
+    
+    
+    
+    
+    // MARK: - IB Hooks
+    
+    /// Image for the Inactive style.
     /// The following IBInspectible for each image state are included as hooks for interface builder. They may be used programmatically but the setImage API may be simpler.
     /// :see: setImage(forActivityStates:)
     @IBInspectable public var inactiveImage: UIImage? {
@@ -533,230 +846,5 @@ public class ActivityIndicatorButton: UIControl {
         }
     }
     
-    private var imagesByActivityState = [ActivityState : UIImage]()
-    
-    public func setImage(image: UIImage?, forActivityStates states: [ActivityState]) {
-        for aState in states {
-            if let image = image {
-                imagesByActivityState[aState] = image
-            }
-            else {
-                imagesByActivityState.removeValueForKey(aState)
-            }
-        }
-        self.updateForCurrentStyle(previousState: nil, animated: false)
-    }
-    
-    public func image(forActivityState state: ActivityState) -> UIImage? {
-        var image = imagesByActivityState[state]
-        return image != nil ? image : self.image
-    }
-    
-    
-    
-    
-    
-    
-    // MARK: - UI (Private)
-    
-    
-    private class ButtonView {
-    
-        let containerView = UIView()
-        var imageView: UIImageView!
-        let mask = CAShapeLayer()
-        
-        init(image: UIImage?) {
-            
-            imageView = UIImageView(image: image)
-            
-            containerView.setTranslatesAutoresizingMaskIntoConstraints(false)
-            imageView.setTranslatesAutoresizingMaskIntoConstraints(false)
-            
-            containerView.addSubview(imageView)
-            containerView.addConstraint(NSLayoutConstraint(item: imageView, attribute: .CenterX, relatedBy: .Equal, toItem: containerView, attribute: .CenterX, multiplier: 1.0, constant: 0.0))
-            containerView.addConstraint(NSLayoutConstraint(item: imageView, attribute: .CenterY, relatedBy: .Equal, toItem: containerView, attribute: .CenterY, multiplier: 1.0, constant: 0.0))
-            
-            mask.fillColor = UIColor.whiteColor().CGColor
-            containerView.layer.mask = mask
-            
-            imageView.userInteractionEnabled = false
-            containerView.userInteractionEnabled = false
-        }
-        
-        func updateColors(color: UIColor, tintBackground: Bool) {
-            
-            let tintColor = imageView.image == nil ? UIColor.clearColor() : color
-            
-            if tintBackground {
-                containerView.backgroundColor = tintColor
-                imageView.tintColor = UIColor.whiteColor()
-            }
-            else {
-                containerView.backgroundColor = UIColor.clearColor()
-                imageView.tintColor = tintColor
-            }
-        }
-        
-        func removeFromSuperview() {
-            containerView.removeFromSuperview()
-        }
-        
-    }
-    
-    
-    /// Used to display the image
-    private var centerButtonView: ButtonView!
-    
-    /// View containing the layers. Makes it easier to keep the layers in the right zOrder.
-    private lazy var activityContainerView: UIView = {
-        let view = UIView()
-        view.setTranslatesAutoresizingMaskIntoConstraints(false)
-        view.backgroundColor = UIColor.clearColor()
-        view.userInteractionEnabled = false
-        return view
-    }()
-    
-    /// The spinning activity indicator
-    private lazy var progressLayer: CAShapeLayer = CAShapeLayer()
-    
-    /// The outline around the progressLayer when state is Normal or Progress
-    private lazy var outlineLayer: CAShapeLayer = CAShapeLayer()
-    
-    /// Displays a material design style animation when the control is highlighted
-    private lazy var hitAnimationLayer: CAShapeLayer = CAShapeLayer()
-    
-    /// Masks the hitAnimationLayer so it doesn't overlap the bounds of the outline layer.
-    private lazy var hitAnimationLayerMask: CAShapeLayer = CAShapeLayer()
-    
-    
-    
-    
-    // MARK: - Theming
-    
-    override public func tintColorDidChange() {
-        super.tintColorDidChange()
-        
-        updateColors()
-    }
-    
-    private func updateColors() {
-        let color = self.tintColorForActivityState
-        let clear = UIColor.clearColor().CGColor
-        
-        self.centerButtonView.updateColors(color, tintBackground: self.tintControlBackground)
-        
-        progressLayer.strokeColor = color.CGColor
-        progressLayer.fillColor = clear
-        progressLayer.lineWidth = 2.5
-        
-        outlineLayer.strokeColor = color.CGColor
-        outlineLayer.fillColor = clear
-        outlineLayer.lineWidth = 1.0
-    }
-
-    
-    
-    
-    
-    
-    // MARK: - Layout
-    
-    
-    let outlineWidth: CGFloat = 1.0
-    let progressWidth: CGFloat = 2.0
-    let imagePadding: CGFloat = 5.0
-    
-    
-    /**
-    Should be called once and only once. Adds layers to view heirarchy.
-    */
-    private func initialLayoutSetup() {
-        
-        self.addSubview(activityContainerView)
-        
-        let views = ["view" : activityContainerView]
-        self.addConstraints(NSLayoutConstraint.constraintsWithVisualFormat("H:|[view]|", options: NSLayoutFormatOptions.allZeros, metrics: nil, views: views))
-        self.addConstraints(NSLayoutConstraint.constraintsWithVisualFormat("V:|[view]|", options: NSLayoutFormatOptions.allZeros, metrics: nil, views: views))
-        
-        let superlayer = activityContainerView.layer
-        superlayer.addSublayer(outlineLayer)
-        superlayer.insertSublayer(progressLayer, above: outlineLayer)
-        superlayer.insertSublayer(hitAnimationLayer, below: outlineLayer)
-        hitAnimationLayer.mask = hitAnimationLayerMask
-        
-        self.centerButtonView = ButtonView(image: self.image(forActivityState: self.activityState))
-        self.addButtonView(self.centerButtonView)
-    }
-    
-    /**
-    Should call this to add a new button view to the view heirarchy
-    
-    :param: buttonView The new button view
-    */
-    private func addButtonView(buttonView: ButtonView) {
-        
-        self.addSubview(buttonView.containerView)
-        self.bringSubviewToFront(buttonView.containerView)
-        
-        let views = ["button" : buttonView.containerView]
-        let metrics = ["PAD" : self.outlineWidth + self.progressWidth]
-        
-        self.addConstraints(NSLayoutConstraint.constraintsWithVisualFormat("H:|-(PAD)-[button]-(PAD)-|", options: NSLayoutFormatOptions.allZeros, metrics: metrics, views: views))
-        self.addConstraints(NSLayoutConstraint.constraintsWithVisualFormat("V:|-(PAD)-[button]-(PAD)-|", options: NSLayoutFormatOptions.allZeros, metrics: metrics, views: views))
-    }
-    
-    /**
-    Should be called when bounds change to update paths of shape layers.
-    */
-    private func updateForCurrentBounds() {
-        
-        // Get the rect in which we will draw the oval for the activity indicator
-        // In the case our bounds are not a square, square off to the minimum direction so that our oval is always a circle
-        // And obviously lets make it centered
-        let frame = self.bounds
-        
-        self.outlineLayer.frame = frame
-        self.progressLayer.frame = frame
-        
-        let center = CGPointMake(CGRectGetMidX(frame), CGRectGetMidY(frame))
-        let radius = min(frame.width, frame.height) * 0.5
-        let start = CGFloat(-M_PI_2)  // Start angle is pointing directly upwards on the screen. This is where progress animations will begin
-        let end = CGFloat(3 * M_PI_2)
-        
-        outlineLayer.path = UIBezierPath(arcCenter: center, radius: radius - self.progressWidth - self.outlineWidth * 0.5, startAngle: start, endAngle: end, clockwise: true).CGPath
-        progressLayer.path = UIBezierPath(arcCenter: center, radius: radius - self.progressWidth * 0.5, startAngle: start, endAngle: end, clockwise: true).CGPath
-        
-        let buttonMask = UIBezierPath(ovalInRect: self.centerButtonView.containerView.bounds).CGPath
-        self.centerButtonView.mask.path = buttonMask
-        hitAnimationLayerMask.path = buttonMask
-    }
-    
-    public override func layoutSubviews() {
-        super.layoutSubviews()
-        
-        updateForCurrentBounds()
-    }
-    
-    /// The intrinsicContentSize if no images are provided. If images are provided this is the intrinsicContentSize.
-    public let defaultContentSize: CGSize = CGSizeMake(35.0, 35.0)
-    
-    public override func intrinsicContentSize() -> CGSize {
-        var maxW: CGFloat = self.defaultContentSize.width
-        var maxH: CGFloat = self.defaultContentSize.height
-        
-        let totalImagePadding = 2 * (self.outlineWidth + self.progressWidth + self.imagePadding)
-        
-        let allImages = [image, inactiveImage, spinningImage, progressImage, pausedImage, completeImage]
-        
-        for anImage in allImages {
-            if let size = anImage?.size {
-                maxW = max(maxW, size.width + totalImagePadding)
-                maxH = max(maxH, size.height + totalImagePadding)
-            }
-        }
-        
-        return CGSizeMake(maxW, maxH)
-    }
     
 }
