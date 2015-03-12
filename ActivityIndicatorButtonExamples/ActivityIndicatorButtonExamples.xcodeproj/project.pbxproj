@@ -419,6 +419,7 @@
 				FD7D4C021AADDB14009BFB7E /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		FD7D4C031AADDB14009BFB7E /* Build configuration list for PBXNativeTarget "ActivityIndicatorButtonExamplesTests" */ = {
 			isa = XCConfigurationList;
@@ -427,6 +428,7 @@
 				FD7D4C051AADDB14009BFB7E /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

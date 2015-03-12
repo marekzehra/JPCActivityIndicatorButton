@@ -213,7 +213,8 @@ public class ActivityIndicatorButton: UIControl {
         // If image has changed and we're animating...
         if shouldAnimateImage {
             
-            let duration = 0.25
+            let duration = self.animationDuration
+            let animationKey = "image"
             
             let bounds = nextButtonView.containerView.bounds
             let center = CGPointMake(CGRectGetMidX(bounds), CGRectGetMidY(bounds))
@@ -236,18 +237,33 @@ public class ActivityIndicatorButton: UIControl {
                 expandNewButton.toValue = compressed
                 expandNewButton.duration = duration
                 
-                nextButtonView.containerView.layer.mask.addAnimation(expandNewButton, forKey: "expand")
+                nextButtonView.containerView.layer.mask.addAnimation(expandNewButton, forKey: animationKey)
                 
                 CATransaction.commit()
             }
             else {
                 
+                func prepareAnimationBackground(color: UIColor) {
+                    CATransaction.begin()
+                    CATransaction.setValue(kCFBooleanTrue, forKey: kCATransactionDisableActions)
+                    self.outlineLayer.fillColor = color.CGColor
+                    CATransaction.commit()
+                }
+                
                 nextButtonView.updateColors(self.tintColorForActivityState(self.activityState), tintBackground: self.tintControlBackground)
+                
                 if let prevState = prevState {
-                    self.outlineLayer.fillColor = (self.tintControlBackground && prevValues.nextImage != nil) ? self.tintColorForActivityState(prevState).CGColor : UIColor.clearColor().CGColor
+                    CATransaction.begin()
+                    CATransaction.setValue(kCFBooleanTrue, forKey: kCATransactionDisableActions)
+                    self.outlineLayer.fillColor = (self.tintControlBackground && prevValues.nextImage != nil ? self.tintColorForActivityState(prevState) : UIColor.clearColor()).CGColor
+                    CATransaction.commit()
                 }
                 
                 let completion = { () -> Void in
+                    CATransaction.begin()
+                    CATransaction.setValue(kCFBooleanTrue, forKey: kCATransactionDisableActions)
+                    self.outlineLayer.fillColor = UIColor.clearColor().CGColor
+                    CATransaction.commit()
                     self.updateColors()
                 }
                 
@@ -260,7 +276,7 @@ public class ActivityIndicatorButton: UIControl {
                 expandNewButton.toValue = expanded
                 expandNewButton.duration = duration
                 
-                nextButtonView.containerView.layer.mask.addAnimation(expandNewButton, forKey: "expand")
+                nextButtonView.containerView.layer.mask.addAnimation(expandNewButton, forKey: animationKey)
                 
                 CATransaction.commit()
             }
@@ -563,6 +579,9 @@ public class ActivityIndicatorButton: UIControl {
             
             mask.fillColor = UIColor.whiteColor().CGColor
             containerView.layer.mask = mask
+            
+            imageView.userInteractionEnabled = false
+            containerView.userInteractionEnabled = false
         }
         
         func updateColors(color: UIColor, tintBackground: Bool) {
@@ -594,6 +613,7 @@ public class ActivityIndicatorButton: UIControl {
         let view = UIView()
         view.setTranslatesAutoresizingMaskIntoConstraints(false)
         view.backgroundColor = UIColor.clearColor()
+        view.userInteractionEnabled = false
         return view
     }()
     
@@ -738,6 +758,5 @@ public class ActivityIndicatorButton: UIControl {
         
         return CGSizeMake(maxW, maxH)
     }
-    
     
 }

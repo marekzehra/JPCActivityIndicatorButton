@@ -19,8 +19,36 @@ class ViewController: UIViewController {
         self.activityIndicator.setTintColor(UIColor(red: 0.298, green: 0.686, blue: 0.314, alpha: 1.0), forActivityStates: [ActivityIndicatorButton.ActivityState.Complete])
     }
     
-    @IBAction func activityButtonTapped(sender: AnyObject) {
-        println("Activity Button Tapped")
+    @IBAction func touchDown(sender: AnyObject) {
+        println("TOUCH DOWN   WOO!")
+    }
+
+    @IBAction func touchDownRepeat(sender: AnyObject) {
+        println("TOUCH DOWN REPEAT  WOO! WOO!")
+    }
+    
+    @IBAction func touchDragInside(sender: AnyObject) {
+        println("TOUCH DRAG INSIDE")
+    }
+    
+    @IBAction func touchDragOutside(sender: AnyObject) {
+        println("TOUCH DRAG OUTSIDE")
+    }
+    
+    @IBAction func touchDragEnter(sender: AnyObject) {
+        println("TOUCH DRAG ENTER")
+    }
+    
+    @IBAction func touchDragExit(sender: AnyObject) {
+        println("TOUCH DRAG EXIT")
+    }
+    
+    @IBAction func touchUpInside(sender: AnyObject) {
+        println("TOUCH UP INSIDE")
+    }
+    
+    @IBAction func touchUpOutside(sender: AnyObject) {
+        println("TOUCH UP OUTSIDE")
     }
 
     @IBAction func stateValueChanged(sender: UISegmentedControl) {

@@ -56,7 +56,14 @@
                                     </mask>
                                 </variation>
                                 <connections>
-                                    <action selector="activityButtonTapped:" destination="BYZ-38-t0r" eventType="touchUpInside" id="9eN-8e-OBu"/>
+                                    <action selector="touchDown:" destination="BYZ-38-t0r" eventType="touchDown" id="8vI-Fv-9x2"/>
+                                    <action selector="touchDownRepeat:" destination="BYZ-38-t0r" eventType="touchDownRepeat" id="Kvu-y8-7Of"/>
+                                    <action selector="touchDragEnter:" destination="BYZ-38-t0r" eventType="touchDragEnter" id="xo8-BC-ew0"/>
+                                    <action selector="touchDragExit:" destination="BYZ-38-t0r" eventType="touchDragExit" id="mp5-lh-FVf"/>
+                                    <action selector="touchDragInside:" destination="BYZ-38-t0r" eventType="touchDragInside" id="Spi-et-6JG"/>
+                                    <action selector="touchDragOutside:" destination="BYZ-38-t0r" eventType="touchDragOutside" id="jZC-Qg-9fa"/>
+                                    <action selector="touchUpInside:" destination="BYZ-38-t0r" eventType="touchUpInside" id="HVY-Lw-i0M"/>
+                                    <action selector="touchUpOutside:" destination="BYZ-38-t0r" eventType="touchUpOutside" id="9Lf-9U-C0e"/>
                                 </connections>
                             </view>
                             <slider opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" minValue="0.0" maxValue="1" translatesAutoresizingMaskIntoConstraints="NO" id="kUK-7C-jha">
