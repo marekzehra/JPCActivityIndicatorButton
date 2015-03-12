@@ -193,12 +193,16 @@ public class ActivityIndicatorButton: UIControl {
                 self.isExpand = isExpand
             }
             
-            func addToLayer(layer: CAShapeLayer, duration: CFTimeInterval){
+            func addToLayer(layer: CAShapeLayer, shadowLayer: CALayer?, duration: CFTimeInterval){
                 
+                // Shadow path is identical to button mask - ***** Should this change update this code
                 let currentPath = layer.path
                 let bounds = CGPathGetPathBoundingBox(currentPath)
                 let center = CGPointMake(CGRectGetMidX(bounds), CGRectGetMidY(bounds))
                 let compressed = UIBezierPath(arcCenter: center, radius: 0.0, startAngle: 0.0, endAngle: CGFloat(M_PI * 2), clockwise: true).CGPath
+                
+                let fromValue = isExpand ? compressed : currentPath
+                let toValue = isExpand ? currentPath : compressed
                 
                 CATransaction.begin()
                 
@@ -206,11 +210,21 @@ public class ActivityIndicatorButton: UIControl {
                     CATransaction.setCompletionBlock(handler)
                 }
                 let anim = CABasicAnimation(keyPath: "path")
-                anim.fromValue = isExpand ? compressed : currentPath
-                anim.toValue = isExpand ? currentPath : compressed
+                anim.fromValue = fromValue
+                anim.toValue = toValue
                 anim.duration = duration
                 
                 layer.addAnimation(anim, forKey: "path_scale")
+                
+                if let shadowLayer = shadowLayer {
+                    
+                    let anim = CABasicAnimation(keyPath: "shadowPath")
+                    anim.fromValue = fromValue
+                    anim.toValue = toValue
+                    anim.duration = duration
+                    
+                    shadowLayer.addAnimation(anim, forKey: "shadowPath")
+                }
                 
                 CATransaction.commit()
             }
@@ -231,22 +245,17 @@ public class ActivityIndicatorButton: UIControl {
         
         if shouldAnimateTrack {
             
-            let bounds = self.activityContainerView.bounds
-            let center = CGPointMake(CGRectGetMidX(bounds), CGRectGetMidY(bounds))
-            let compressed = UIBezierPath(arcCenter: center, radius: 0.0, startAngle: 0.0, endAngle: CGFloat(M_PI * 2), clockwise: true).CGPath
-            let expanded = UIBezierPath(ovalInRect: bounds).CGPath
-            
             // Expand
             if nextValues.showTrack && prevValues.image == nil {
                 
                 trackOpacity.setNoAnimation(self.trackLayer)
-                ScaleAnimation(isExpand: true).addToLayer(self.trackLayer, duration: self.animationDuration)
+                ScaleAnimation(isExpand: true).addToLayer(self.trackLayer, shadowLayer: nil, duration: self.animationDuration)
             }
             // Collapse
             else if !nextValues.showTrack && nextValues.image == nil {
                 
                 trackOpacity.setNoAnimation(self.trackLayer)
-                ScaleAnimation(isExpand: false).addToLayer(self.trackLayer, duration: self.animationDuration)
+                ScaleAnimation(isExpand: false).addToLayer(self.trackLayer, shadowLayer: nil, duration: self.animationDuration)
             }
             // Fade track
             else {
@@ -275,6 +284,9 @@ public class ActivityIndicatorButton: UIControl {
             
             var anim = ScaleAnimation()
             
+            // We only want to animate the drop shadow if the button is appearing or disapearing (i.e. one of the images is nil)
+            let shadowLayer: CALayer? = (nextValues.image == nil) || (prevValues.image == nil) ? self.dropShadowLayer : nil
+            
             // Collaspe old image
             if nextValues.image == nil {
                 
@@ -284,7 +296,8 @@ public class ActivityIndicatorButton: UIControl {
                 
                 anim.isExpand = false
                 anim.completion = completion
-                anim.addToLayer(nextButtonView.mask, duration: self.animationDuration)
+                anim.addToLayer(nextButtonView.mask, shadowLayer: shadowLayer, duration: self.animationDuration)
+                
             }
             else {
                 
@@ -293,7 +306,8 @@ public class ActivityIndicatorButton: UIControl {
                 
                 self.updateButtonColors()
                 
-                // TODO: Add animation backing layer
+                // Add animation backing layer - We want the previous color to remain while the new button exands to fill its place. Add a backing layer to display the old color while we animate in the new one
+                // FIXME: This layer is sized one pixel too big. Get the exact dimensions of the button
                 if let prevState = prevState {
                     CATransaction.begin()
                     CATransaction.setValue(kCFBooleanTrue, forKey: kCATransactionDisableActions)
@@ -310,7 +324,7 @@ public class ActivityIndicatorButton: UIControl {
                 
                 anim.isExpand = true
                 anim.completion = completion
-                anim.addToLayer(nextButtonView.mask, duration: self.animationDuration)
+                anim.addToLayer(nextButtonView.mask, shadowLayer: shadowLayer, duration: self.animationDuration)
             }
             
         }
@@ -477,11 +491,11 @@ public class ActivityIndicatorButton: UIControl {
     
     /// The color of the drop shadow or UIColor.clearColor() if you do not wish to display a shadow. The shadow never drawn is useSolidColorButtons is false.
     /// :see: useSolidColorButtons
-    @IBInspectable public var shadowColor = UIColor.blackColor()
+    @IBInspectable public var shadowColor: UIColor = UIColor.blackColor()
     
     
     /// The color of the touch down and touch up ripple animation. Default value is UIColor.grayColor().colorWithAlphaComponent(0.25).
-    @IBInspectable public var hitAnimationColor = UIColor.grayColor().colorWithAlphaComponent(0.25)
+    @IBInspectable public var hitAnimationColor: UIColor = UIColor.grayColor().colorWithAlphaComponent(0.25)
     
     
     /// If true the circular background of this control is colored with the tint color and the image is colored white. Otherwise the background is clear and the image is tinted. Image color is only adjusted if it is a template image.
@@ -631,6 +645,11 @@ public class ActivityIndicatorButton: UIControl {
         
     }
     
+    private var dropShadowLayer: CALayer {
+        get {
+            return self.layer
+        }
+    }
     
     /// Used to display the image
     private lazy var centerButtonView = ButtonView()
@@ -670,10 +689,12 @@ public class ActivityIndicatorButton: UIControl {
         if self.useSolidColorButtons {
             self.centerButtonView.containerView.backgroundColor = tintColor
             self.centerButtonView.imageView.tintColor = UIColor.whiteColor()
+            self.dropShadowLayer.shadowColor = (self.centerButtonView.imageView.image != nil) ? self.shadowColor.CGColor : UIColor.clearColor().CGColor
         }
         else {
             self.centerButtonView.containerView.backgroundColor = UIColor.clearColor()
             self.centerButtonView.imageView.tintColor = tintColor
+            self.dropShadowLayer.shadowColor = UIColor.clearColor().CGColor
         }
         
     }
@@ -714,6 +735,8 @@ public class ActivityIndicatorButton: UIControl {
     */
     private func initialLayoutSetup() {
         
+        self.backgroundColor = UIColor.clearColor()
+        
         self.addSubview(activityContainerView)
         
         let views = ["view" : activityContainerView, "button" : self.centerButtonView.containerView]
@@ -731,6 +754,14 @@ public class ActivityIndicatorButton: UIControl {
         
         self.addConstraints(NSLayoutConstraint.constraintsWithVisualFormat("H:|-(PAD)-[button]-(PAD)-|", options: NSLayoutFormatOptions.allZeros, metrics: metrics, views: views))
         self.addConstraints(NSLayoutConstraint.constraintsWithVisualFormat("V:|-(PAD)-[button]-(PAD)-|", options: NSLayoutFormatOptions.allZeros, metrics: metrics, views: views))
+        
+        
+        // Set up drop shadow
+        let layer = self.dropShadowLayer
+        layer.shadowOffset = CGSizeMake(0, 2)
+        layer.shadowRadius = 2.5
+        layer.shadowOpacity = 0.5
+        layer.masksToBounds = false
     }
     
     
@@ -757,6 +788,9 @@ public class ActivityIndicatorButton: UIControl {
         
         let buttonMask = UIBezierPath(ovalInRect: self.centerButtonView.containerView.bounds).CGPath
         self.centerButtonView.mask.path = buttonMask
+        
+        // Drop shadow path
+        self.dropShadowLayer.shadowPath = buttonMask
     }
     
     public override func layoutSubviews() {

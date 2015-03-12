@@ -39,6 +39,7 @@
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Ai5-sy-cDS" customClass="ActivityIndicatorButton" customModule="ActivityIndicatorButtonExamples" customModuleProvider="target">
                                 <rect key="frame" x="280" y="45" width="40" height="40"/>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                <color key="tintColor" red="0.47296174952749714" green="0.79798430599287229" blue="1" alpha="1" colorSpace="calibratedRGB"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="44" id="6vo-Il-q6G"/>
                                     <constraint firstAttribute="width" constant="44" id="pSd-ah-qrA"/>
@@ -48,6 +49,7 @@
                                     <userDefinedRuntimeAttribute type="image" keyPath="progressImage" value="pause"/>
                                     <userDefinedRuntimeAttribute type="image" keyPath="pausedImage" value="play"/>
                                     <userDefinedRuntimeAttribute type="image" keyPath="completeImage" value="complete"/>
+                                    <userDefinedRuntimeAttribute type="boolean" keyPath="useSolidColorButtons" value="YES"/>
                                 </userDefinedRuntimeAttributes>
                                 <variation key="default">
                                     <mask key="constraints">
