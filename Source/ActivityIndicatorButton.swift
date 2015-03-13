@@ -63,6 +63,10 @@ public class ActivityIndicatorButton: UIControl {
         initialLayoutSetup()
         updateAllColors()
         updateForCurrentStyle(previousState: nil, animated: false)
+        
+        // Observe touch down and up for fire ripple animations
+        self.addTarget(self, action: "handleTouchUp:", forControlEvents: .TouchUpInside)
+        self.addTarget(self, action: "handleTouchDown:", forControlEvents: .TouchDown)
     }
     
     
@@ -486,16 +490,25 @@ public class ActivityIndicatorButton: UIControl {
     // MARK: - Configuration
     
     
+    
+    // MARK: Hit Ripple Animation
+    
+    /// The distance past the edge of the button which the ripple animation will propagate on touch up and touch down
+    @IBInspectable public var hitAnimationDistance: CGFloat = 5.0
+    
+    /// The duration of the ripple hit animation
+    @IBInspectable public var hitAnimationDuration: CFTimeInterval = 0.5
+    
+    /// The color of the touch down and touch up ripple animation. Default value is UIColor.grayColor().colorWithAlphaComponent(0.25).
+    @IBInspectable public var hitAnimationColor: UIColor = UIColor.grayColor().colorWithAlphaComponent(0.5)
+    
+    
     // MARK: Colors
     
     
     /// The color of the drop shadow or UIColor.clearColor() if you do not wish to display a shadow. The shadow never drawn is useSolidColorButtons is false.
     /// :see: useSolidColorButtons
     @IBInspectable public var shadowColor: UIColor = UIColor.blackColor()
-    
-    
-    /// The color of the touch down and touch up ripple animation. Default value is UIColor.grayColor().colorWithAlphaComponent(0.25).
-    @IBInspectable public var hitAnimationColor: UIColor = UIColor.grayColor().colorWithAlphaComponent(0.25)
     
     
     /// If true the circular background of this control is colored with the tint color and the image is colored white. Otherwise the background is clear and the image is tinted. Image color is only adjusted if it is a template image.
@@ -821,6 +834,91 @@ public class ActivityIndicatorButton: UIControl {
     }
     
     
+    
+    
+    
+    
+    // MARK: - Hit Animation
+    
+    func handleTouchUp(sender: ActivityIndicatorButton) {
+        
+        self.createRippleHitAnimation(true)
+    }
+    
+    func handleTouchDown(sender: ActivityIndicatorButton) {
+        
+        self.createRippleHitAnimation(false)
+    }
+    
+    
+    /**
+    Creates a new layer under the control which expands outward.
+    */
+    private func createRippleHitAnimation(isTouchUp: Bool) {
+        
+        let duration = self.hitAnimationDuration
+        let distance: CGFloat = self.hitAnimationDistance
+        let color = self.hitAnimationColor.CGColor
+        let timing = CAMediaTimingFunction(name: kCAMediaTimingFunctionEaseOut)
+        
+        let layer = CAShapeLayer()
+        layer.fillColor = color
+        layer.strokeColor = UIColor.clearColor().CGColor
+        self.layer.insertSublayer(layer, atIndex: 0)
+        
+        let bounds = self.bounds
+        let radius = max(bounds.width, bounds.height) * 0.5
+        let center = CGPointMake(CGRectGetMidX(bounds), CGRectGetMidY(bounds))
+        let fromPath = UIBezierPath(arcCenter: center, radius: 0.0, startAngle: 0.0, endAngle: CGFloat(2 * M_PI), clockwise: true).CGPath
+        let toPath = UIBezierPath(arcCenter: center, radius: radius + distance, startAngle: 0.0, endAngle: CGFloat(2 * M_PI), clockwise: true).CGPath
+        
+        let completion = { () -> Void in
+            layer.removeFromSuperlayer()
+        }
+        
+        func scaleLayer(layer: CALayer, offset: CGFloat) {
+            
+            var scaleFromValue = CATransform3DIdentity
+            var scaleToValue = CATransform3DMakeScale(0.98 - offset, 0.98 - offset, 1.0)
+            
+            if isTouchUp {
+                swap(&scaleFromValue, &scaleToValue)
+            }
+            
+            let scaleAnim = CABasicAnimation(keyPath: "transform")
+            scaleAnim.fromValue = NSValue(CATransform3D: scaleFromValue)
+            scaleAnim.toValue = NSValue(CATransform3D: scaleToValue)
+            scaleAnim.duration = duration
+            scaleAnim.timingFunction = timing
+            
+            layer.addAnimation(scaleAnim, forKey: "hit_scale")
+            layer.transform = scaleToValue
+        }
+        
+        CATransaction.begin()
+        CATransaction.setCompletionBlock(completion)
+        
+        let pathAnim = CABasicAnimation(keyPath: "path")
+        pathAnim.fromValue = fromPath
+        pathAnim.toValue = toPath
+        
+        let fadeAnim = CABasicAnimation(keyPath: "opacity")
+        fadeAnim.fromValue = 1.0
+        fadeAnim.toValue = 0.0
+        
+        scaleLayer(self.trackLayer, 0.3) // Add a little extra scaling to the track. Since its larger it will be behind if we dont
+        scaleLayer(self.centerButtonView.containerView.layer, 0.0)
+        scaleLayer(self.dropShadowLayer, 0.0)
+        
+        let group = CAAnimationGroup()
+        group.animations = [pathAnim, fadeAnim]
+        group.duration = duration
+        group.timingFunction = timing
+        
+        layer.addAnimation(group, forKey: "ripple")
+        
+        CATransaction.commit()
+    }
     
     
     
