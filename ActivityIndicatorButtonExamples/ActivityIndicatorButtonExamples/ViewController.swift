@@ -16,7 +16,8 @@ class ViewController: UIViewController {
         super.viewDidLoad()
         
         self.activityIndicator.useSolidColorButtons = true
-        self.activityIndicator.setTintColor(UIColor(red: 0.298, green: 0.686, blue: 0.314, alpha: 1.0), forActivityStates: [ActivityIndicatorButton.ActivityState.Complete])
+        self.activityIndicator.setTrackColor(UIColor.lightGrayColor(), forActivityStates: [.Spinning, .Progress])
+        self.activityIndicator.setTintColor(UIColor(red: 0.298, green: 0.686, blue: 0.314, alpha: 1.0), forActivityStates: [.Complete])
     }
     
     @IBAction func touchDown(sender: AnyObject) {
