@@ -78,7 +78,7 @@ public class ActivityIndicatorButton: UIControl {
 
     - Inactive: In this state the control is waiting for an action to get started.
     - Spinning: Activity analogous to UISpinner. Track not displayed.
-    - Progress: Displays a progress bar stating from midnight at 0% and moving clockwise to 100%.
+    - Progress: Displays a progress bar taking a circular path from 0 to 100%.
     - Paused:   Suspends Spinning or Progress in action.
     - Complete: Show this state when the activity has completed.
     */

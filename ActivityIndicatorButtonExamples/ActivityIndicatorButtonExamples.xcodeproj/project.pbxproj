@@ -7,13 +7,13 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		A6FBB588F22967E19D89936D /* Pods.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7139E9655681A0FA25012F3D /* Pods.framework */; settings = {ATTRIBUTES = (Weak, ); }; };
 		FD7D4BE71AADDB14009BFB7E /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD7D4BE61AADDB14009BFB7E /* AppDelegate.swift */; };
 		FD7D4BE91AADDB14009BFB7E /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD7D4BE81AADDB14009BFB7E /* ViewController.swift */; };
 		FD7D4BEC1AADDB14009BFB7E /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = FD7D4BEA1AADDB14009BFB7E /* Main.storyboard */; };
 		FD7D4BEE1AADDB14009BFB7E /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = FD7D4BED1AADDB14009BFB7E /* Images.xcassets */; };
 		FD7D4BF11AADDB14009BFB7E /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = FD7D4BEF1AADDB14009BFB7E /* LaunchScreen.xib */; };
 		FD7D4BFD1AADDB14009BFB7E /* ActivityIndicatorButtonExamplesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD7D4BFC1AADDB14009BFB7E /* ActivityIndicatorButtonExamplesTests.swift */; };
-		FD7D4C081AADDBF6009BFB7E /* ActivityIndicatorButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD7D4C071AADDBF6009BFB7E /* ActivityIndicatorButton.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -27,6 +27,9 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		297C4759C00C6A481DB5ECED /* Pods.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.debug.xcconfig; path = "Pods/Target Support Files/Pods/Pods.debug.xcconfig"; sourceTree = "<group>"; };
+		7139E9655681A0FA25012F3D /* Pods.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		BFED46469C8F3A613F354708 /* Pods.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.release.xcconfig; path = "Pods/Target Support Files/Pods/Pods.release.xcconfig"; sourceTree = "<group>"; };
 		FD7D4BE11AADDB14009BFB7E /* ActivityIndicatorButtonExamples.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ActivityIndicatorButtonExamples.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		FD7D4BE51AADDB14009BFB7E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		FD7D4BE61AADDB14009BFB7E /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -37,7 +40,6 @@
 		FD7D4BF61AADDB14009BFB7E /* ActivityIndicatorButtonExamplesTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ActivityIndicatorButtonExamplesTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		FD7D4BFB1AADDB14009BFB7E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		FD7D4BFC1AADDB14009BFB7E /* ActivityIndicatorButtonExamplesTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivityIndicatorButtonExamplesTests.swift; sourceTree = "<group>"; };
-		FD7D4C071AADDBF6009BFB7E /* ActivityIndicatorButton.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ActivityIndicatorButton.swift; path = ../../Source/ActivityIndicatorButton.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -45,6 +47,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A6FBB588F22967E19D89936D /* Pods.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -58,12 +61,31 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		29CE18F88DD912B717959335 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				7139E9655681A0FA25012F3D /* Pods.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		2EC13A3AF2737FCCE31C8E56 /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				297C4759C00C6A481DB5ECED /* Pods.debug.xcconfig */,
+				BFED46469C8F3A613F354708 /* Pods.release.xcconfig */,
+			);
+			name = Pods;
+			sourceTree = "<group>";
+		};
 		FD7D4BD81AADDB14009BFB7E = {
 			isa = PBXGroup;
 			children = (
 				FD7D4BE31AADDB14009BFB7E /* ActivityIndicatorButtonExamples */,
 				FD7D4BF91AADDB14009BFB7E /* ActivityIndicatorButtonExamplesTests */,
 				FD7D4BE21AADDB14009BFB7E /* Products */,
+				2EC13A3AF2737FCCE31C8E56 /* Pods */,
+				29CE18F88DD912B717959335 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -79,7 +101,6 @@
 		FD7D4BE31AADDB14009BFB7E /* ActivityIndicatorButtonExamples */ = {
 			isa = PBXGroup;
 			children = (
-				FD7D4C061AADDBD2009BFB7E /* Source */,
 				FD7D4BE61AADDB14009BFB7E /* AppDelegate.swift */,
 				FD7D4BE81AADDB14009BFB7E /* ViewController.swift */,
 				FD7D4BEA1AADDB14009BFB7E /* Main.storyboard */,
@@ -115,14 +136,6 @@
 			name = "Supporting Files";
 			sourceTree = "<group>";
 		};
-		FD7D4C061AADDBD2009BFB7E /* Source */ = {
-			isa = PBXGroup;
-			children = (
-				FD7D4C071AADDBF6009BFB7E /* ActivityIndicatorButton.swift */,
-			);
-			name = Source;
-			sourceTree = "<group>";
-		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -130,9 +143,12 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = FD7D4C001AADDB14009BFB7E /* Build configuration list for PBXNativeTarget "ActivityIndicatorButtonExamples" */;
 			buildPhases = (
+				665595B9A4BF7C35A461B7AB /* Check Pods Manifest.lock */,
 				FD7D4BDD1AADDB14009BFB7E /* Sources */,
 				FD7D4BDE1AADDB14009BFB7E /* Frameworks */,
 				FD7D4BDF1AADDB14009BFB7E /* Resources */,
+				CB40F08AB8CDD02E569A524F /* Embed Pods Frameworks */,
+				C41D26DBB0688E186B034FD0 /* Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -218,13 +234,60 @@
 		};
 /* End PBXResourcesBuildPhase section */
 
+/* Begin PBXShellScriptBuildPhase section */
+		665595B9A4BF7C35A461B7AB /* Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Check Pods Manifest.lock";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_ROOT}/../Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [[ $? != 0 ]] ; then\n    cat << EOM\nerror: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\nEOM\n    exit 1\nfi\n";
+			showEnvVarsInLog = 0;
+		};
+		C41D26DBB0688E186B034FD0 /* Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Copy Pods Resources";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods/Pods-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		CB40F08AB8CDD02E569A524F /* Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Embed Pods Frameworks";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods/Pods-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
+
 /* Begin PBXSourcesBuildPhase section */
 		FD7D4BDD1AADDB14009BFB7E /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 				FD7D4BE91AADDB14009BFB7E /* ViewController.swift in Sources */,
-				FD7D4C081AADDBF6009BFB7E /* ActivityIndicatorButton.swift in Sources */,
 				FD7D4BE71AADDB14009BFB7E /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -348,6 +411,7 @@
 		};
 		FD7D4C011AADDB14009BFB7E /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 297C4759C00C6A481DB5ECED /* Pods.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				INFOPLIST_FILE = ActivityIndicatorButtonExamples/Info.plist;
@@ -358,6 +422,7 @@
 		};
 		FD7D4C021AADDB14009BFB7E /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = BFED46469C8F3A613F354708 /* Pods.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				INFOPLIST_FILE = ActivityIndicatorButtonExamples/Info.plist;

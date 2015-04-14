@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import JPCActivityIndicatorButton
 
 class ViewController: UIViewController {
 
