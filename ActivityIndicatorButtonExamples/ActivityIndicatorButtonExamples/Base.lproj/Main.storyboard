@@ -74,11 +74,24 @@
                                     <action selector="progressValueChanged:" destination="BYZ-38-t0r" eventType="valueChanged" id="usV-Im-BmK"/>
                                 </connections>
                             </slider>
+                            <switch opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" contentHorizontalAlignment="center" contentVerticalAlignment="center" on="YES" translatesAutoresizingMaskIntoConstraints="NO" id="5Qg-gN-HhG">
+                                <rect key="frame" x="456" y="374" width="51" height="31"/>
+                                <connections>
+                                    <action selector="solidButtonChanged:" destination="BYZ-38-t0r" eventType="valueChanged" id="qTf-Y2-jCS"/>
+                                </connections>
+                            </switch>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Solid Button" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="95L-0Q-HMU">
+                                <rect key="frame" x="353" y="379" width="95" height="21"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
                         <constraints>
                             <constraint firstItem="kUK-7C-jha" firstAttribute="top" secondItem="QWt-VH-3yp" secondAttribute="bottom" constant="8" id="2a9-td-ZEd"/>
                             <constraint firstItem="Ai5-sy-cDS" firstAttribute="top" secondItem="y3c-jy-aDJ" secondAttribute="bottom" constant="25" id="7sw-nH-ltC"/>
+                            <constraint firstItem="5Qg-gN-HhG" firstAttribute="trailing" secondItem="v4F-FA-VtI" secondAttribute="trailing" id="9Ww-mL-VUb"/>
                             <constraint firstItem="kUK-7C-jha" firstAttribute="leading" secondItem="QWt-VH-3yp" secondAttribute="trailing" constant="-68" id="FNI-L8-xXg"/>
                             <constraint firstItem="v4F-FA-VtI" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="8bC-Xf-vdC" secondAttribute="leadingMargin" constant="5" id="GD8-rT-Zjl"/>
                             <constraint firstItem="kUK-7C-jha" firstAttribute="leading" secondItem="QWt-VH-3yp" secondAttribute="leading" id="IeS-77-NUe"/>
@@ -87,8 +100,11 @@
                             <constraint firstAttribute="centerX" secondItem="Ai5-sy-cDS" secondAttribute="centerX" id="Tp3-Py-cYb"/>
                             <constraint firstItem="kUK-7C-jha" firstAttribute="trailing" secondItem="v4F-FA-VtI" secondAttribute="trailing" id="U1S-il-yXU"/>
                             <constraint firstItem="kUK-7C-jha" firstAttribute="leading" secondItem="v4F-FA-VtI" secondAttribute="leading" id="bx0-lP-SNh"/>
+                            <constraint firstItem="v4F-FA-VtI" firstAttribute="top" secondItem="5Qg-gN-HhG" secondAttribute="bottom" constant="22" id="gvJ-ez-9bz"/>
                             <constraint firstAttribute="centerX" secondItem="v4F-FA-VtI" secondAttribute="centerX" id="ihJ-0i-4o0"/>
+                            <constraint firstItem="5Qg-gN-HhG" firstAttribute="centerY" secondItem="95L-0Q-HMU" secondAttribute="centerY" id="kcm-L7-afy"/>
                             <constraint firstItem="wfy-db-euE" firstAttribute="top" secondItem="kUK-7C-jha" secondAttribute="bottom" constant="40" id="lgb-gd-8h3"/>
+                            <constraint firstItem="5Qg-gN-HhG" firstAttribute="leading" secondItem="95L-0Q-HMU" secondAttribute="trailing" constant="8" id="mQl-Y6-1Rb"/>
                             <constraint firstAttribute="trailingMargin" relation="greaterThanOrEqual" secondItem="v4F-FA-VtI" secondAttribute="trailing" constant="5" id="vKD-WD-t6M"/>
                         </constraints>
                         <variation key="default">
@@ -100,6 +116,9 @@
                     </view>
                     <connections>
                         <outlet property="activityIndicator" destination="Ai5-sy-cDS" id="jAx-RA-6k2"/>
+                        <outlet property="progressSlider" destination="kUK-7C-jha" id="aIS-FH-jiL"/>
+                        <outlet property="solidButtonSwitch" destination="5Qg-gN-HhG" id="7wz-5d-0xk"/>
+                        <outlet property="stateSelector" destination="v4F-FA-VtI" id="nDi-9A-ZY9"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
