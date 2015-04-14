@@ -351,7 +351,7 @@ public class ActivityIndicatorButton: UIControl {
         
         // Restart / adjust progress view if needed
         self.updateSpinningAnimation()
-        self.updateProgress(fromValue: 0.0, animated: animated)
+        self.updateProgress(fromValue: 0.0, animated: prevState != .Paused)
     }
 
     private var _progress: Float = 0.0
@@ -385,14 +385,22 @@ public class ActivityIndicatorButton: UIControl {
     private func updateProgress(fromValue prevValue: Float, animated: Bool) {
         if activityState == .Progress {
 
-            let anim = CABasicAnimation(keyPath: "strokeEnd")
-            anim.fromValue = prevValue
-            anim.toValue = _progress
-            anim.duration = self.animationDuration
-            anim.timingFunction = self.animationTimingFunction
-            self.progressView.progressLayer.addAnimation(anim, forKey: "progress")
+            if animated {
+                let anim = CABasicAnimation(keyPath: "strokeEnd")
+                anim.fromValue = prevValue
+                anim.toValue = _progress
+                anim.duration = self.animationDuration
+                anim.timingFunction = self.animationTimingFunction
+                self.progressView.progressLayer.addAnimation(anim, forKey: "progress")
 
-            self.progressView.progressLayer.strokeEnd = CGFloat(_progress)
+                self.progressView.progressLayer.strokeEnd = CGFloat(_progress)
+            }
+            else {
+                CATransaction.begin()
+                CATransaction.setValue(kCFBooleanTrue, forKey: kCATransactionDisableActions)
+                self.progressView.progressLayer.strokeEnd = CGFloat(_progress)
+                CATransaction.commit()
+            }
         }
     }
 
