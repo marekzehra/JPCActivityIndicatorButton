@@ -2,11 +2,19 @@
 
 ActivityIndicatorButton is an implementation of the progress control used in the App Store app and several other Apple apps. However the style is inspired by Google's material design. 
 
+It is a drop in replacement for UIActivityIndicatorView and UIProgressView that tracks touch input like a UIButton. It may be useful in the following scenarios
+* Replacement for UIActivityIndicatorView
+* Replacement for UIProgressView
+* Replacement for UIButton with Google Material Design styling
+* To create a similar interaction as start and stopping downloads in the App Store app. 
+
 ### Default "App Store" style
 ![example](Images/demo_normal.gif)
 
 ### Material Design Style
 ![example2](Images/demo_solid.gif)
+
+There is a slight border between the progress bar and the button that I'm calling the "track" however it is hard to see in this GIF.
 
 ---
 
