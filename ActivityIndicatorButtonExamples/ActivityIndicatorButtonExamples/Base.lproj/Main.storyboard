@@ -36,8 +36,8 @@
                                 <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                 <nil key="highlightedColor"/>
                             </label>
-                            <view contentMode="scaleToFill" ambiguous="YES" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Ai5-sy-cDS" customClass="ActivityIndicatorButton" customModule="ActivityIndicatorButtonExamples" customModuleProvider="target">
-                                <rect key="frame" x="280" y="45" width="40" height="40"/>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Ai5-sy-cDS" customClass="ActivityIndicatorButton" customModule="ActivityIndicatorButtonExamples" customModuleProvider="target">
+                                <rect key="frame" x="279" y="45" width="43" height="43"/>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                 <color key="tintColor" red="0.47296174952749714" green="0.79798430599287229" blue="1" alpha="1" colorSpace="calibratedRGB"/>
                                 <constraints>

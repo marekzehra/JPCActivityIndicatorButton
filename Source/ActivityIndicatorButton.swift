@@ -53,14 +53,34 @@ private extension CGRect {
 public class ActivityIndicatorButton: UIControl {
 
 
+    
+    struct Constants {
+        struct Layout {
+            static let outerPadding: CGFloat = 1
+            static let progressWidth: CGFloat = 2.5
+            static let trackWidth: CGFloat = 1
+            /// The intrinsicContentSize if no images are provided. If images are provided this is the intrinsicContentSize.
+            static let defaultContentSize: CGSize = CGSizeMake(35.0, 35.0)
+            /// For intrinsicContentSize calculations this is the padding between the image and the background.
+            static let minimumImagePadding: CGFloat = 5
+        }
+        struct Track {
+            static let StartAngle = CGFloat(-M_PI_2)  // Start angle is pointing directly upwards on the screen. This is where progress animations will begin
+            static let EndAngle = CGFloat(3 * M_PI_2)
+        }
+    }
+    
+    
+    
+    
     /**
-    The Style of the activity button. This defines the "state" of the activity indicator. Use UIControlState for the state of the button.
+    The state of the activity button. This defines the "state" of the activity indicator. Use UIControlState for the state of the button.
 
-    - Inactive: Inactive image with circular outline.
-    - Spinning: Spinning image surrounded by animated spinning line. Circular outline not displayed.
-    - Progress: Progress image surrouded by ciruclar progress bar.
-    - Paused:   Paused image. Progress bar or spinning indicator suspended in action.
-    - Complete: Complete image with circular outline.
+    - Inactive: In this state the control is waiting for an action to get started.
+    - Spinning: Activity analogous to UISpinner. Track not displayed.
+    - Progress: Displays a progress bar taking a circular path from 0 to 100%.
+    - Paused:   Suspends Spinning or Progress in action.
+    - Complete: Show this state when the activity has completed.
     */
     public enum ActivityState {
         case Inactive, Spinning, Progress, Paused, Complete
@@ -76,7 +96,7 @@ public class ActivityIndicatorButton: UIControl {
     // MARK: - IBDesignable
 
     public override func prepareForInterfaceBuilder() {
-        // TODO: Render for interface builder preview
+        // TODO: Improve rendering for interface builder preview
     }
 
 
@@ -103,7 +123,7 @@ public class ActivityIndicatorButton: UIControl {
     private func commonInit() {
         initialLayoutSetup()
         updateAllColors()
-        updateForCurrentStyle(previousState: nil, animated: false)
+        updateForCurrentState(previousState: nil, animated: false)
 
         // Observe touch down and up for fire ripple animations
         self.addTarget(self, action: "handleTouchUp:", forControlEvents: .TouchUpInside)
@@ -114,14 +134,19 @@ public class ActivityIndicatorButton: UIControl {
 
 
 
-    // MARK: - Configuration
+    // MARK: - State Machine
 
-    public let animationDuration: CFTimeInterval = 0.2
+    /// Defines the length of the animation for ActivityState transitions.
+    public var animationDuration: CFTimeInterval = 0.2
+    
+    /// The timing function for ActivityState transitions.
+    public var animationTimingFunction: CAMediaTimingFunction = CAMediaTimingFunction(name: kCAMediaTimingFunctionEaseOut)
 
+    /// Internal storage for ActivityState.
     private var _activityState: ActivityState = .Inactive
 
-    /// Transition the control to a Style. Equivalent to calling transition(toStyle: animated:false)
-    /// :see: transition(toStyle:animated:)
+    /// Transition the control to a ActivityState. Equivalent to calling transition(toActivityState: animated:false)
+    /// :see: transition(toActivityState:animted:)
     public var activityState: ActivityState {
         get {
             return _activityState
@@ -132,12 +157,12 @@ public class ActivityIndicatorButton: UIControl {
     }
 
     /**
-    Transition from current style to a new style.
+    Transition from current ActivityState to a new ActivityState.
 
-    :param: toStyle  The new style
-    :param: animated Animate the transition
+    :param: toActivityState  The new ActivityState
+    :param: animated         Animate the transition
 
-    :see: style
+    :see: activityState
     */
     public func transition(toActivityState state: ActivityState, animated: Bool) {
 
@@ -145,16 +170,16 @@ public class ActivityIndicatorButton: UIControl {
             let prev = _activityState
             _activityState = state
 
-            updateForCurrentStyle(previousState: prev, animated: animated)
+            updateForCurrentState(previousState: prev, animated: animated)
         }
     }
 
     /**
-    Does the real work of transitioning from one style to the next. If previous style is set will also update out of that style.
+    Does the real work of transitioning from one ActivityState to the next. If previous state is set will also update out of that state.
     */
-    private func updateForCurrentStyle(previousState prevState: ActivityState?, animated: Bool) {
+    private func updateForCurrentState(previousState prevState: ActivityState?, animated: Bool) {
 
-
+        // Determine which components are visible in a state
         func configForState(state: ActivityState) -> (showTrack: Bool, showProgress: Bool, image: UIImage?) {
 
             var showTrack = false
@@ -172,7 +197,7 @@ public class ActivityIndicatorButton: UIControl {
                 showTrack = true
                 showProgress = true
             case .Paused:
-                break
+                showTrack = true
             case .Complete:
                 showTrack = true
                 showProgress = false
@@ -186,18 +211,20 @@ public class ActivityIndicatorButton: UIControl {
         var nextValues = configForState(_activityState)
         var prevValues: (showTrack: Bool, showProgress: Bool, image: UIImage?) = (self.backgroundView.shapeLayer.opacity > 0.5, self.progressView.progressLayer.opacity > 0.5, nil)
         
+        // We only animate the image if it has changed so we need to know the previous value
         if let prevState = prevState {
             let config = configForState(prevState)
             prevValues.image = config.image
         }
         
-        // Edge case: Paused state never modifies values
+        // Edge case: Paused state never modifies progress bar
         if _activityState == .Paused {
-            nextValues.showTrack = prevValues.showTrack
             nextValues.showProgress = prevValues.showProgress
         }
 
 
+        
+        // Progress View and Background View animations
 
         struct OpacityAnimation {
             let toValue: Float
@@ -208,11 +235,12 @@ public class ActivityIndicatorButton: UIControl {
                 self.fromValue = hidden ? 1.0 : 0.0
             }
 
-            func addToLayer(layer: CALayer, duration: CFTimeInterval) {
+            func addToLayer(layer: CALayer, duration: CFTimeInterval, function: CAMediaTimingFunction) {
                 let opacityanim = CABasicAnimation(keyPath: "opacity")
                 opacityanim.toValue = self.toValue
                 opacityanim.fromValue = self.fromValue
                 opacityanim.duration = duration
+                opacityanim.timingFunction = function
                 layer.addAnimation(opacityanim, forKey: "opacity")
 
                 layer.opacity = toValue
@@ -229,92 +257,106 @@ public class ActivityIndicatorButton: UIControl {
         var trackOpacity = OpacityAnimation(hidden: !nextValues.showTrack)
         var progressOpacity = OpacityAnimation(hidden: !nextValues.showProgress)
 
+        // Only animate if value has changed
         let shouldAnimateTrack = animated && prevValues.showTrack != nextValues.showTrack
         let shouldAnimateProgressBar = animated && prevValues.showProgress != nextValues.showProgress
         let shouldAnimateImage = animated && prevValues.image != nextValues.image
 
         if shouldAnimateTrack {
-            trackOpacity.addToLayer(self.backgroundView.shapeLayer, duration: self.animationDuration)
+            trackOpacity.addToLayer(self.backgroundView.shapeLayer, duration: self.animationDuration, function: self.animationTimingFunction)
         }
         else {
             trackOpacity.setNoAnimation(self.backgroundView.shapeLayer)
         }
 
         if shouldAnimateProgressBar {
-            progressOpacity.addToLayer(self.progressView.progressLayer, duration: self.animationDuration)
+            progressOpacity.addToLayer(self.progressView.progressLayer, duration: self.animationDuration, function: self.animationTimingFunction)
         }
         else {
             progressOpacity.setNoAnimation(self.progressView.progressLayer)
         }
 
+        
+        
+        // A helper to get a "compressed" path represented by a single point at the center of the existing path.
+        func compressPath(path: CGPath) -> CGPath {
+            let bounds = CGPathGetPathBoundingBox(path)
+            let center = CGPointMake(CGRectGetMidX(bounds), CGRectGetMidY(bounds))
+            return UIBezierPath(arcCenter: center, radius: 0.0, startAngle: 0.0, endAngle: CGFloat(M_PI * 2), clockwise: true).CGPath
+        }
 
-
-        self.setImage(nextValues.image)
-
-
-        // If image has changed and we're animating...
-        if shouldAnimateImage {
-
-            var transitionLayer: CAShapeLayer? = nil
+        
+        
+        // Color transition for "useSolidColorButtons"
+        // If the tint color is different between 2 states we animate the change by expanding the new color from the center of the button
+        if let prevState = prevState where self.useSolidColorButtons  {
             
-            if prevState != nil && self.useSolidColorButtons {
-                let _transitionLayer = CAShapeLayer()
-                _transitionLayer.path = self.backgroundLayerPath
-                
-                CATransaction.begin()
-                CATransaction.setValue(kCFBooleanTrue, forKey: kCATransactionDisableActions)
-                _transitionLayer.fillColor = self.tintColorForActivityState(_activityState).CGColor
-                CATransaction.commit()
-                
-                self.backgroundView.layer.addSublayer(_transitionLayer)
-                transitionLayer = _transitionLayer
-            }
+            // The transition layer provides the expanding color change in the state transition. The background view color isn't updating until completing this expand animation
+            let transitionLayer = CAShapeLayer()
+            transitionLayer.path = self.backgroundLayerPath
             
+            CATransaction.begin()
+            CATransaction.setValue(kCFBooleanTrue, forKey: kCATransactionDisableActions)
+            transitionLayer.fillColor = self.tintColor(forActivityState: _activityState).CGColor
+            CATransaction.commit()
+            
+            self.backgroundView.layer.addSublayer(transitionLayer)
+         
             let completion = { () -> Void in
                 
-                transitionLayer?.removeFromSuperlayer()
+                transitionLayer.removeFromSuperlayer()
                 self.updateAllColors()
             }
             
-            func compressPath(path: CGPath) -> CGPath {
-                let bounds = CGPathGetPathBoundingBox(path)
-                let center = CGPointMake(CGRectGetMidX(bounds), CGRectGetMidY(bounds))
-                return UIBezierPath(arcCenter: center, radius: 0.0, startAngle: 0.0, endAngle: CGFloat(M_PI * 2), clockwise: true).CGPath
-            }
-            
             CATransaction.begin()
-            
             CATransaction.setCompletionBlock(completion)
+            
+            let bgAnim = CABasicAnimation(keyPath: "path")
+            bgAnim.fromValue = compressPath(self.backgroundLayerPath)
+            bgAnim.toValue = self.backgroundLayerPath
+            bgAnim.duration = self.animationDuration
+            bgAnim.timingFunction = self.animationTimingFunction
+            
+            transitionLayer.addAnimation(bgAnim, forKey: "bg_expand")
+            
+            CATransaction.commit()
+        }
+        else {
+            self.updateAllColors()
+        }
+        
+        
+        
+
+        // Update the image before we drive the animations
+        self.setImage(nextValues.image)
+
+        // If image has changed and we're animating...
+        // For image animations we reveal the new image from the center by expanding its mask
+        if shouldAnimateImage {
             
             // Image mask expand
             let imageAnim = CABasicAnimation(keyPath: "path")
             imageAnim.fromValue = compressPath(self.imageViewMaskPath)
             imageAnim.toValue = self.imageViewMaskPath
             imageAnim.duration = self.animationDuration
+            imageAnim.timingFunction = self.animationTimingFunction
             
             self.imageViewMask.addAnimation(imageAnim, forKey: "image_expand")
-            
-            let bgAnim = CABasicAnimation(keyPath: "path")
-            bgAnim.fromValue = compressPath(self.backgroundLayerPath)
-            bgAnim.toValue = self.backgroundLayerPath
-            bgAnim.duration = self.animationDuration
-            
-            transitionLayer?.addAnimation(bgAnim, forKey: "bg_expand")
-            
-            CATransaction.commit()
-            
         }
         else {
             updateAllColors()
         }
 
+        
+        // Restart / adjust progress view if needed
         self.updateSpinningAnimation()
         self.updateProgress(fromValue: 0.0, animated: animated)
     }
 
     private var _progress: Float = 0.0
 
-    /// A float between 0.0 and 1.0 specifying the progress amount in the Progress state. This is displayed clockwise where 1.0 fills the whole circle. Equivalent to calling setProgress(animated: false).
+    /// A float between 0.0 and 1.0 specifying the progress amount in the Progress state. This is displayed clockwise (starting at midnight) where 1.0 fills the whole circle. Equivalent to calling setProgress(animated: false).
     /// :see: setProgress(animated:)
     public var progress: Float {
         get {
@@ -346,13 +388,16 @@ public class ActivityIndicatorButton: UIControl {
             let anim = CABasicAnimation(keyPath: "strokeEnd")
             anim.fromValue = prevValue
             anim.toValue = _progress
-            anim.duration = 0.2
+            anim.duration = self.animationDuration
+            anim.timingFunction = self.animationTimingFunction
             self.progressView.progressLayer.addAnimation(anim, forKey: "progress")
 
             self.progressView.progressLayer.strokeEnd = CGFloat(_progress)
         }
     }
 
+    
+    /// This replicates the Google style activity spinner from Material Design
     private func updateSpinningAnimation() {
 
         let kStrokeAnim = "spinning_stroke"
@@ -362,8 +407,10 @@ public class ActivityIndicatorButton: UIControl {
         self.progressView.progressLayer.removeAnimationForKey(kRotationAnim)
         if activityState == .Spinning {
 
-
-            // TODO: Clean this up
+            // The animation is broken into stages that execute in order. All animations in "stage 1" execute simultaneously followed by animations in "stage 2"
+            // "Head" refers to the strokeStart which is trailing behind the animation (i.e. the animation is moving clockwise away from the head)
+            // "Tail refers to the strokeEnd which is leading the animation
+            
             let stage1Time = 0.9
             let pause1Time = 0.05
             let stage2Time = 0.6
@@ -372,6 +419,8 @@ public class ActivityIndicatorButton: UIControl {
 
             var animationTime = stage1Time
 
+            // Stage1: The circle begins life empty, nothing is stroked.  The tail moves ahead to travel the circumference of the circle. The head follows but lags behind 75% of the circumference. Now 75% of the circles circumference is stroked.
+            
             let headStage1 = CABasicAnimation(keyPath: "strokeStart")
             headStage1.fromValue = 0.0
             headStage1.toValue = 0.25
@@ -382,6 +431,7 @@ public class ActivityIndicatorButton: UIControl {
             tailStage1.toValue = 1.0
             tailStage1.duration = animationTime
 
+            // Pause1: Maintain state from stage 1 for a moment
 
             let headPause1 = CABasicAnimation(keyPath: "strokeStart")
             headPause1.fromValue = 0.25
@@ -396,6 +446,8 @@ public class ActivityIndicatorButton: UIControl {
             tailPause1.duration = pause1Time
 
             animationTime += pause1Time
+            
+            // Stage2: The head whips around the circle to almost catch up with the tail. The tail stays at the end of the circle. Now 10% of the circles circumference is stroked.
 
             let headStage2 = CABasicAnimation(keyPath: "strokeStart")
             headStage2.fromValue = 0.25
@@ -410,6 +462,8 @@ public class ActivityIndicatorButton: UIControl {
             tailStage2.duration = stage2Time
 
             animationTime += stage2Time
+            
+            // Pause2: Maintain state from Stage2 for a moment.
 
             let headPause2 = CABasicAnimation(keyPath: "strokeStart")
             headPause2.fromValue = 0.9
@@ -424,6 +478,8 @@ public class ActivityIndicatorButton: UIControl {
             tailPause2.duration = pause2Time
 
             animationTime += pause2Time
+            
+            // Stage3: The head moves to 100% the circumference to finally catch up with the tail which remains stationary. Now none of the circle is stroked and we are back at the starting state.
 
             let headStage3 = CABasicAnimation(keyPath: "strokeStart")
             headStage3.fromValue = 0.9
@@ -500,7 +556,7 @@ public class ActivityIndicatorButton: UIControl {
 
     :returns: The tint color for the activity state
     */
-    public func tintColorForActivityState(state: ActivityState) -> UIColor {
+    public func tintColor(forActivityState state: ActivityState) -> UIColor {
         let color = self.tintColorsByState[state]
         return color == nil ? self.tintColor : color
     }
@@ -522,11 +578,11 @@ public class ActivityIndicatorButton: UIControl {
         }
     }
 
-
+    
     private var trackColorByState = [ActivityState : UIColor]()
 
     /**
-    Get the trackColor for an activity state
+    Get the trackColor for an activity state. The track is the line along which the progress bar runs.
 
     :param: state The activity state
 
@@ -536,7 +592,7 @@ public class ActivityIndicatorButton: UIControl {
         if let color = trackColorByState[state] {
             return color
         }
-        return self.tintColorForActivityState(state)
+        return self.tintColor(forActivityState: state)
     }
 
     /**
@@ -565,7 +621,7 @@ public class ActivityIndicatorButton: UIControl {
     private var imagesByActivityState = [ActivityState : UIImage]()
 
     /**
-    Set an image for a set of control states
+    Set an image for a set of activity states
 
     :param: image  The image for the control state or nil for no image
     :param: states An array of control states. Use ActivityState.allValues to apply the change for all
@@ -579,7 +635,7 @@ public class ActivityIndicatorButton: UIControl {
                 imagesByActivityState.removeValueForKey(aState)
             }
         }
-        self.updateForCurrentStyle(previousState: nil, animated: false)
+        self.updateForCurrentState(previousState: nil, animated: false)
     }
 
     /**
@@ -667,7 +723,7 @@ public class ActivityIndicatorButton: UIControl {
     }
 
     private func updateButtonColors() {
-        let tintColor = self.tintColorForActivityState(self.activityState)
+        let tintColor = self.tintColor(forActivityState: self.activityState)
         
         if self.useSolidColorButtons {
             self.backgroundView.shapeLayer.fillColor = tintColor.CGColor
@@ -683,7 +739,7 @@ public class ActivityIndicatorButton: UIControl {
     }
 
     private func updateTrackColors() {
-        let tintColor = self.tintColorForActivityState(self.activityState).CGColor
+        let tintColor = self.tintColor(forActivityState: self.activityState).CGColor
         let trackColor = self.trackColor(forActivityState: self.activityState).CGColor
         let clear = UIColor.clearColor().CGColor
 
@@ -706,22 +762,6 @@ public class ActivityIndicatorButton: UIControl {
 
 
     // MARK: - Layout
-    
-    struct Constants {
-        struct Layout {
-            static let outerPadding: CGFloat = 1
-            static let progressWidth: CGFloat = 2.5
-            static let trackWidth: CGFloat = 1
-            /// The intrinsicContentSize if no images are provided. If images are provided this is the intrinsicContentSize.
-            static let defaultContentSize: CGSize = CGSizeMake(35.0, 35.0)
-            /// For intrinsicContentSize calculations this is the padding between the image and the background.
-            static let minimumImagePadding: CGFloat = 5
-        }
-        struct Track {
-            static let StartAngle = CGFloat(-M_PI_2)  // Start angle is pointing directly upwards on the screen. This is where progress animations will begin
-            static let EndAngle = CGFloat(3 * M_PI_2)
-        }
-    }
     
     private var progressLayerPath: CGPath {
         get {
@@ -936,8 +976,12 @@ public class ActivityIndicatorButton: UIControl {
 
     // MARK: - IB Hooks
 
-    /// Image for the Inactive style.
-    /// The following IBInspectible for each image state are included as hooks for interface builder. They may be used programmatically but the setImage API may be simpler.
+    /*
+        These do not serve as a novel API. They may be used programmacially but are really intended as IBInspectable properties.
+    */
+    
+    /// Image for the Inactive state.
+    /// These do not serve as a novel API. They may be used programmacially but are really intended as IBInspectable properties.
     /// :see: setImage(forActivityStates:)
     @IBInspectable public var inactiveImage: UIImage? {
         get {
@@ -948,7 +992,9 @@ public class ActivityIndicatorButton: UIControl {
         }
     }
 
-    /// Image for the Spinning style
+    /// Image for the Spinning state
+    /// These do not serve as a novel API. They may be used programmacially but are really intended as IBInspectable properties.
+    /// :see: setImage(forActivityStates:)
     @IBInspectable public var spinningImage: UIImage? {
         get {
             return imagesByActivityState[.Spinning]
@@ -958,7 +1004,9 @@ public class ActivityIndicatorButton: UIControl {
         }
     }
 
-    /// Image for the Progress style
+    /// Image for the Progress state
+    /// These do not serve as a novel API. They may be used programmacially but are really intended as IBInspectable properties.
+    /// :see: setImage(forActivityStates:)
     @IBInspectable public var progressImage: UIImage? {
         get {
             return imagesByActivityState[.Progress]
@@ -968,7 +1016,9 @@ public class ActivityIndicatorButton: UIControl {
         }
     }
 
-    /// Image for the Paused style
+    /// Image for the Paused state
+    /// These do not serve as a novel API. They may be used programmacially but are really intended as IBInspectable properties.
+    /// :see: setImage(forActivityStates:)
     @IBInspectable public var pausedImage: UIImage? {
         get {
             return imagesByActivityState[.Paused]
@@ -978,7 +1028,9 @@ public class ActivityIndicatorButton: UIControl {
         }
     }
 
-    /// Image for the Complete style
+    /// Image for the Complete state
+    /// These do not serve as a novel API. They may be used programmacially but are really intended as IBInspectable properties.
+    /// :see: setImage(forActivityStates:)
     @IBInspectable public var completeImage: UIImage? {
         get {
             return imagesByActivityState[.Complete]
@@ -988,5 +1040,124 @@ public class ActivityIndicatorButton: UIControl {
         }
     }
 
-
+    /// Tint color for the Inactive state.
+    /// These do not serve as a novel API. They may be used programmacially but are really intended as IBInspectable properties.
+    /// :see: setTintColor(forActivityStates:)
+    @IBInspectable public var inactiveTintColor: UIColor? {
+        get {
+            return tintColor(forActivityState: .Inactive)
+        }
+        set {
+            setTintColor(newValue, forActivityStates: [.Inactive])
+        }
+    }
+    
+    /// Tint color for the Spinning state.
+    /// These do not serve as a novel API. They may be used programmacially but are really intended as IBInspectable properties.
+    /// :see: setTintColor(forActivityStates:)
+    @IBInspectable public var spinningTintColor: UIColor? {
+        get {
+            return tintColor(forActivityState: .Spinning)
+        }
+        set {
+            setTintColor(newValue, forActivityStates: [.Spinning])
+        }
+    }
+    
+    /// Tint color for the Progress state.
+    /// These do not serve as a novel API. They may be used programmacially but are really intended as IBInspectable properties.
+    /// :see: setTintColor(forActivityStates:)
+    @IBInspectable public var progressTintColor: UIColor? {
+        get {
+            return tintColor(forActivityState: .Progress)
+        }
+        set {
+            setTintColor(newValue, forActivityStates: [.Progress])
+        }
+    }
+    
+    /// Tint color for the Paused state.
+    /// These do not serve as a novel API. They may be used programmacially but are really intended as IBInspectable properties.
+    /// :see: setTintColor(forActivityStates:)
+    @IBInspectable public var pausedTintColor: UIColor? {
+        get {
+            return tintColor(forActivityState: .Paused)
+        }
+        set {
+            setTintColor(newValue, forActivityStates: [.Paused])
+        }
+    }
+    
+    /// Tint color for the Complete state.
+    /// These do not serve as a novel API. They may be used programmacially but are really intended as IBInspectable properties.
+    /// :see: setTintColor(forActivityStates:)
+    @IBInspectable public var completeTintColor: UIColor? {
+        get {
+            return tintColor(forActivityState: .Complete)
+        }
+        set {
+            setTintColor(newValue, forActivityStates: [.Complete])
+        }
+    }
+    
+    /// Track color for the Inactive state.
+    /// These do not serve as a novel API. They may be used programmacially but are really intended as IBInspectable properties.
+    /// :see: setTrackColor(forActivityStates:)
+    @IBInspectable public var inactiveTrackColor: UIColor? {
+        get {
+            return trackColor(forActivityState: .Inactive)
+        }
+        set {
+            setTrackColor(newValue, forActivityStates: [.Inactive])
+        }
+    }
+    
+    /// Track color for the Spinning state.
+    /// These do not serve as a novel API. They may be used programmacially but are really intended as IBInspectable properties.
+    /// :see: setTrackColor(forActivityStates:)
+    @IBInspectable public var spinningTrackColor: UIColor? {
+        get {
+            return trackColor(forActivityState: .Spinning)
+        }
+        set {
+            setTrackColor(newValue, forActivityStates: [.Spinning])
+        }
+    }
+    
+    /// Track color for the Inactive state.
+    /// These do not serve as a novel API. They may be used programmacially but are really intended as IBInspectable properties.
+    /// :see: setTrackColor(forActivityStates:)
+    @IBInspectable public var progressTrackColor: UIColor? {
+        get {
+            return trackColor(forActivityState: .Progress)
+        }
+        set {
+            setTrackColor(newValue, forActivityStates: [.Progress])
+        }
+    }
+    
+    /// Track color for the Inactive state.
+    /// These do not serve as a novel API. They may be used programmacially but are really intended as IBInspectable properties.
+    /// :see: setTrackColor(forActivityStates:)
+    @IBInspectable public var pausedTrackColor: UIColor? {
+        get {
+            return trackColor(forActivityState: .Paused)
+        }
+        set {
+            setTrackColor(newValue, forActivityStates: [.Paused])
+        }
+    }
+    
+    /// Track color for the Inactive state.
+    /// These do not serve as a novel API. They may be used programmacially but are really intended as IBInspectable properties.
+    /// :see: setTrackColor(forActivityStates:)
+    @IBInspectable public var completeTrackColor: UIColor? {
+        get {
+            return trackColor(forActivityState: .Complete)
+        }
+        set {
+            setTrackColor(newValue, forActivityStates: [.Complete])
+        }
+    }
+    
 }

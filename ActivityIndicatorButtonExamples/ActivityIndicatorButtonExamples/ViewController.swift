@@ -72,7 +72,7 @@ class ViewController: UIViewController {
     }
     
     @IBAction func progressValueChanged(sender: UISlider) {
-        activityIndicator.progress = sender.value
+        activityIndicator.progress = sender.value // Don't use animation here. (Or in any situation where there will be continuous updates. It won't crash but its not neccessary)
     }
 }
 
