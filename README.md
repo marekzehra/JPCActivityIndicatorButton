@@ -23,6 +23,10 @@ There is a slight border between the progress bar and the button that I'm callin
 This control may be used in Storyboard or programmically.  It is IBDesignable so you can see a preview and edit its properties directly from interface builder.  Just add a UIView and change its type to "ActivityIndicatorButton".
 
 ``` swift 
+import JPCActivityIndicatorButton // Only if you use Pods or build as a module! (Which you should)
+
+// ...
+
 let button = ActivityIndicatorButton(frame: CGRectZero)
 ```
 
