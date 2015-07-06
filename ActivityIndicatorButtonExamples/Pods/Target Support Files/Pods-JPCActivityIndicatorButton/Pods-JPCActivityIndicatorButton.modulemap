@@ -1,6 +1,0 @@
-framework module JPCActivityIndicatorButton {
-  umbrella header "Pods-JPCActivityIndicatorButton-umbrella.h"
-
-  export *
-  module * { export * }
-}
