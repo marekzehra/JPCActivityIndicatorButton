@@ -32,7 +32,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		FD1152011B4AD240005F0232 /* Examples.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Examples.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		FD1152011B4AD240005F0232 /* zExamples.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = zExamples.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		FD1152051B4AD240005F0232 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		FD1152061B4AD240005F0232 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		FD1152081B4AD240005F0232 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -68,7 +68,7 @@
 		FD1152021B4AD240005F0232 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				FD1152011B4AD240005F0232 /* Examples.app */,
+				FD1152011B4AD240005F0232 /* zExamples.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -123,9 +123,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		FD1152001B4AD240005F0232 /* Examples */ = {
+		FD1152001B4AD240005F0232 /* zExamples */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = FD1152201B4AD240005F0232 /* Build configuration list for PBXNativeTarget "Examples" */;
+			buildConfigurationList = FD1152201B4AD240005F0232 /* Build configuration list for PBXNativeTarget "zExamples" */;
 			buildPhases = (
 				FD1151FD1B4AD240005F0232 /* Sources */,
 				FD1151FE1B4AD240005F0232 /* Frameworks */,
@@ -135,9 +135,9 @@
 			);
 			dependencies = (
 			);
-			name = Examples;
+			name = zExamples;
 			productName = Examples;
-			productReference = FD1152011B4AD240005F0232 /* Examples.app */;
+			productReference = FD1152011B4AD240005F0232 /* zExamples.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -154,7 +154,7 @@
 					};
 				};
 			};
-			buildConfigurationList = FD1151FC1B4AD240005F0232 /* Build configuration list for PBXProject "Examples" */;
+			buildConfigurationList = FD1151FC1B4AD240005F0232 /* Build configuration list for PBXProject "zExamples" */;
 			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
@@ -173,7 +173,7 @@
 			);
 			projectRoot = "";
 			targets = (
-				FD1152001B4AD240005F0232 /* Examples */,
+				FD1152001B4AD240005F0232 /* zExamples */,
 			);
 		};
 /* End PBXProject section */
@@ -329,7 +329,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				INFOPLIST_FILE = Examples/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_NAME = zExamples;
 			};
 			name = Debug;
 		};
@@ -339,14 +339,14 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				INFOPLIST_FILE = Examples/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_NAME = zExamples;
 			};
 			name = Release;
 		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		FD1151FC1B4AD240005F0232 /* Build configuration list for PBXProject "Examples" */ = {
+		FD1151FC1B4AD240005F0232 /* Build configuration list for PBXProject "zExamples" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				FD11521E1B4AD240005F0232 /* Debug */,
@@ -355,7 +355,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		FD1152201B4AD240005F0232 /* Build configuration list for PBXNativeTarget "Examples" */ = {
+		FD1152201B4AD240005F0232 /* Build configuration list for PBXNativeTarget "zExamples" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				FD1152211B4AD240005F0232 /* Debug */,

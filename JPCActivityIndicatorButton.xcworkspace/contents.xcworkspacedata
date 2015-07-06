@@ -5,6 +5,6 @@
       location = "group:JPCActivityIndicatorButton.xcodeproj">
    </FileRef>
    <FileRef
-      location = "group:Examples.xcodeproj">
+      location = "group:/Users/jonc/Developer/mobile/My_Projects/JPCActivityIndicatorButton/zExamples.xcodeproj">
    </FileRef>
 </Workspace>
