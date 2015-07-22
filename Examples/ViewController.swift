@@ -22,12 +22,12 @@ class ViewController: UIViewController {
         static let defaultTintColor = UIColor.blueColor()
         static let trackColor = UIColor.lightGrayColor()
         
-        static let Inactive = ActivityIndicatorButtonState(tintColor: States.defaultTintColor, trackColor: States.trackColor, image: UIImage(named: "inactive"), progressBarStyle: .Inactive)
-        static let Spinning = ActivityIndicatorButtonState(tintColor: States.defaultTintColor, trackColor: States.trackColor, image: nil, progressBarStyle: .Spinning)
-        static var Progress = ActivityIndicatorButtonState(tintColor: States.defaultTintColor, trackColor: States.trackColor, image: UIImage(named: "paused"), progressBarStyle: .Percentage(value: 0))
-        static let Paused = ActivityIndicatorButtonState(tintColor: States.defaultTintColor, trackColor: States.trackColor, image: UIImage(named: "play"), progressBarStyle: .Inactive)
-        static let Complete = ActivityIndicatorButtonState(tintColor: UIColor(red: 0.298, green: 0.686, blue: 0.314, alpha: 1.0), trackColor: States.trackColor, image: UIImage(named: "complete"), progressBarStyle: .Inactive)
-        static let Error = ActivityIndicatorButtonState(tintColor: UIColor.redColor(), trackColor: States.trackColor, image: UIImage(named: "error"), progressBarStyle: .Inactive)
+        static let Inactive = ActivityIndicatorButtonState(image: UIImage(named: "inactive"))
+        static let Spinning = ActivityIndicatorButtonState(progressBarStyle: .Spinning)
+        static var Progress = ActivityIndicatorButtonState(image: UIImage(named: "paused"), progressBarStyle: .Percentage(value: 0))
+        static let Paused = ActivityIndicatorButtonState(image: UIImage(named: "play"))
+        static let Complete = ActivityIndicatorButtonState(tintColor: UIColor(red: 0.298, green: 0.686, blue: 0.314, alpha: 1.0), image: UIImage(named: "complete"))
+        static let Error = ActivityIndicatorButtonState(tintColor: UIColor.redColor(), image: UIImage(named: "error"))
     }
     
     

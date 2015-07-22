@@ -64,14 +64,16 @@ public enum ActivityIndicatorButtonProgressBarStyle: Equatable {
 
 public struct ActivityIndicatorButtonState: Equatable {
     
-    public var tintColor: UIColor
-    public var trackColor: UIColor
+    public var tintColor: UIColor?
+    public var trackColor: UIColor?
+    public var foregroundColor: UIColor?
     public var image: UIImage?
     public var progressBarStyle: ActivityIndicatorButtonProgressBarStyle
     
-    public init(tintColor: UIColor, trackColor: UIColor, image: UIImage?, progressBarStyle: ActivityIndicatorButtonProgressBarStyle) {
+    public init(tintColor: UIColor? = nil, trackColor: UIColor? = nil, foregroundColor: UIColor? = nil, image: UIImage? = nil, progressBarStyle: ActivityIndicatorButtonProgressBarStyle = .Inactive) {
         self.tintColor = tintColor
         self.trackColor = trackColor
+        self.foregroundColor = foregroundColor
         self.image = image
         self.progressBarStyle = progressBarStyle
     }
@@ -126,7 +128,7 @@ public class ActivityIndicatorButton: UIControl {
     
     // MARK: State
     
-    public var _activityState: ActivityIndicatorButtonState = ActivityIndicatorButtonState(tintColor: UIColor.blueColor(), trackColor: UIColor.lightGrayColor(), image: nil, progressBarStyle: .Inactive)
+    public var _activityState: ActivityIndicatorButtonState = ActivityIndicatorButtonState(progressBarStyle: .Inactive)
     
     public var activityState: ActivityIndicatorButtonState {
         get {
@@ -144,6 +146,47 @@ public class ActivityIndicatorButton: UIControl {
         self.updateForNextActivityState(animated: animated)
     }
     
+    public var tintColorForCurrentActivityState: UIColor {
+        if let color = self.activityState.tintColor {
+            return color
+        }
+        return self.tintColor
+    }
+    
+    public var trackColorForCurrentActivityState: UIColor {
+        if let color = self.activityState.trackColor {
+            return color
+        }
+        return self.normalTrackColor
+    }
+    
+    public var foregroundColorForCurrentActivityState: UIColor {
+        if let color = self.activityState.foregroundColor {
+            return color
+        }
+        return self.normalForegroundColor
+    }
+    
+    @IBInspectable public var normalTrackColor: UIColor = UIColor.lightGrayColor() {
+        didSet {
+            updateAllColors()
+        }
+    }
+    
+    @IBInspectable public var normalForegroundColor: UIColor = UIColor.whiteColor() {
+        didSet {
+            updateAllColors()
+        }
+    }
+    
+    @IBInspectable public var image: UIImage? {
+        get {
+            return self.activityState.image
+        }
+        set {
+            self.activityState.image = newValue
+        }
+    }
     
     
     // MARK: State Animations
@@ -252,7 +295,7 @@ public class ActivityIndicatorButton: UIControl {
     
     
     /// Holds the currently rendered State
-    private var currentActivityState: ActivityIndicatorButtonState?
+    private var renderedActivityState: ActivityIndicatorButtonState?
     
     /**
     Does the real work of transitioning from one ActivityState to the next. If previous state is set will also update out of that state.
@@ -266,29 +309,24 @@ public class ActivityIndicatorButton: UIControl {
             let trackColor: UIColor
             let image: UIImage?
             let progressBarStyle: ActivityIndicatorButtonProgressBarStyle
-            
-            init(state: ActivityIndicatorButtonState, style: ActivityIndicatorButtonStyle) {
-                self.trackVisible = style == .Solid || state.progressBarStyle != .Spinning
-                self.progressBarVisible = state.progressBarStyle != .Inactive
-                self.tintColor = state.tintColor
-                self.trackColor = state.trackColor
-                self.image = state.image
-                self.progressBarStyle = state.progressBarStyle
-            }
-            
-            init(currentViewState: ActivityIndicatorButton) {
-                self.trackVisible = currentViewState.backgroundView.shapeLayer.opacity > 0.5
-                self.progressBarVisible = currentViewState.progressView.progressLayer.opacity > 0.5
-                self.tintColor = UIColor(CGColor: currentViewState.style == .Solid ? currentViewState.backgroundView.shapeLayer.fillColor : currentViewState.backgroundView.shapeLayer.strokeColor)!
-                self.trackColor = UIColor(CGColor: currentViewState.backgroundView.shapeLayer.strokeColor)!
-                self.image = currentViewState.imageView.image
-                self.progressBarStyle = currentViewState.currentActivityState != nil ? currentViewState.currentActivityState!.progressBarStyle : .Inactive
-            }
         }
 
 
-        var nextDisplayState = DisplayState(state: activityState, style: self.style)
-        var prevDisplayState = DisplayState(currentViewState: self)
+        var nextDisplayState = DisplayState(
+            trackVisible: style == .Solid || activityState.progressBarStyle != .Spinning,
+            progressBarVisible: activityState.progressBarStyle != .Inactive,
+            tintColor: tintColorForCurrentActivityState,
+            trackColor: trackColorForCurrentActivityState,
+            image: activityState.image,
+            progressBarStyle: activityState.progressBarStyle)
+        
+        var prevDisplayState = DisplayState(
+            trackVisible: backgroundView.shapeLayer.opacity > 0.5,
+            progressBarVisible: progressView.progressLayer.opacity > 0.5,
+            tintColor: UIColor(CGColor: self.style == .Solid ? backgroundView.shapeLayer.fillColor : backgroundView.shapeLayer.strokeColor)!,
+            trackColor: UIColor(CGColor: backgroundView.shapeLayer.strokeColor)!,
+            image: imageView.image,
+            progressBarStyle: renderedActivityState != nil ? renderedActivityState!.progressBarStyle : .Inactive)
 
 
         
@@ -430,7 +468,7 @@ public class ActivityIndicatorButton: UIControl {
         
         
         // Finally update our current activity state
-        self.currentActivityState = activityState
+        self.renderedActivityState = activityState
     }
 
 
@@ -587,7 +625,7 @@ public class ActivityIndicatorButton: UIControl {
     }
     
     private func updateButtonColors() {
-        let tintColor = self.activityState.tintColor
+        let tintColor = self.tintColorForCurrentActivityState
         
         switch self.style {
         case .Outline:
@@ -597,14 +635,14 @@ public class ActivityIndicatorButton: UIControl {
             
         case .Solid:
             self.backgroundView.shapeLayer.fillColor = tintColor.CGColor
-            self.imageView.tintColor = UIColor.whiteColor()
+            self.imageView.tintColor = foregroundColorForCurrentActivityState
             self.dropShadowLayer.shadowColor = self.shadowColor.CGColor
         }
     }
     
     private func updateTrackColors() {
-        let tintColor = self.activityState.tintColor.CGColor
-        let trackColor = self.activityState.trackColor.CGColor
+        let tintColor = self.tintColorForCurrentActivityState.CGColor
+        let trackColor = self.trackColorForCurrentActivityState.CGColor
         let clear = UIColor.clearColor().CGColor
         
         self.progressView.progressLayer.strokeColor = tintColor

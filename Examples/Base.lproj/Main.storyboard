@@ -37,38 +37,6 @@
                                 <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                 <nil key="highlightedColor"/>
                             </label>
-                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Ai5-sy-cDS" customClass="ActivityIndicatorButton" customModule="JPCActivityIndicatorButton">
-                                <rect key="frame" x="283" y="45" width="35" height="35"/>
-                                <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
-                                <color key="tintColor" red="0.11906795631653622" green="0.7760104995882503" blue="1" alpha="1" colorSpace="calibratedRGB"/>
-                                <constraints>
-                                    <constraint firstAttribute="height" constant="44" id="6vo-Il-q6G"/>
-                                    <constraint firstAttribute="width" constant="44" id="pSd-ah-qrA"/>
-                                </constraints>
-                                <userDefinedRuntimeAttributes>
-                                    <userDefinedRuntimeAttribute type="image" keyPath="inactiveImage" value="inactive"/>
-                                    <userDefinedRuntimeAttribute type="image" keyPath="progressImage" value="pause"/>
-                                    <userDefinedRuntimeAttribute type="image" keyPath="pausedImage" value="play"/>
-                                    <userDefinedRuntimeAttribute type="image" keyPath="completeImage" value="complete"/>
-                                    <userDefinedRuntimeAttribute type="boolean" keyPath="useSolidColorButtons" value="YES"/>
-                                </userDefinedRuntimeAttributes>
-                                <variation key="default">
-                                    <mask key="constraints">
-                                        <exclude reference="6vo-Il-q6G"/>
-                                        <exclude reference="pSd-ah-qrA"/>
-                                    </mask>
-                                </variation>
-                                <connections>
-                                    <action selector="touchDown:" destination="BYZ-38-t0r" eventType="touchDown" id="8vI-Fv-9x2"/>
-                                    <action selector="touchDownRepeat:" destination="BYZ-38-t0r" eventType="touchDownRepeat" id="Kvu-y8-7Of"/>
-                                    <action selector="touchDragEnter:" destination="BYZ-38-t0r" eventType="touchDragEnter" id="xo8-BC-ew0"/>
-                                    <action selector="touchDragExit:" destination="BYZ-38-t0r" eventType="touchDragExit" id="mp5-lh-FVf"/>
-                                    <action selector="touchDragInside:" destination="BYZ-38-t0r" eventType="touchDragInside" id="Spi-et-6JG"/>
-                                    <action selector="touchDragOutside:" destination="BYZ-38-t0r" eventType="touchDragOutside" id="jZC-Qg-9fa"/>
-                                    <action selector="touchUpInside:" destination="BYZ-38-t0r" eventType="touchUpInside" id="HVY-Lw-i0M"/>
-                                    <action selector="touchUpOutside:" destination="BYZ-38-t0r" eventType="touchUpOutside" id="9Lf-9U-C0e"/>
-                                </connections>
-                            </view>
                             <slider opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" minValue="0.0" maxValue="1" translatesAutoresizingMaskIntoConstraints="NO" id="kUK-7C-jha">
                                 <rect key="frame" x="53" y="530" width="495" height="31"/>
                                 <connections>
@@ -87,18 +55,32 @@
                                 <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="2n2-Ph-ofz" customClass="ActivityIndicatorButton" customModule="JPCActivityIndicatorButton">
+                                <rect key="frame" x="273" y="40" width="54" height="54"/>
+                                <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                <color key="tintColor" red="0.57673509170000004" green="0.86632265870000003" blue="1" alpha="1" colorSpace="calibratedRGB"/>
+                                <userDefinedRuntimeAttributes>
+                                    <userDefinedRuntimeAttribute type="image" keyPath="image" value="inactive"/>
+                                    <userDefinedRuntimeAttribute type="color" keyPath="normalTrackColor">
+                                        <color key="value" red="0.49658771198306872" green="0.23464423986249838" blue="1" alpha="1" colorSpace="calibratedRGB"/>
+                                    </userDefinedRuntimeAttribute>
+                                    <userDefinedRuntimeAttribute type="color" keyPath="normalForegroundColor">
+                                        <color key="value" red="1" green="0.59992035478386385" blue="0.60274876946181166" alpha="1" colorSpace="calibratedRGB"/>
+                                    </userDefinedRuntimeAttribute>
+                                </userDefinedRuntimeAttributes>
+                            </view>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
                         <constraints>
                             <constraint firstItem="kUK-7C-jha" firstAttribute="top" secondItem="QWt-VH-3yp" secondAttribute="bottom" constant="8" id="2a9-td-ZEd"/>
-                            <constraint firstItem="Ai5-sy-cDS" firstAttribute="top" secondItem="y3c-jy-aDJ" secondAttribute="bottom" constant="25" id="7sw-nH-ltC"/>
+                            <constraint firstItem="2n2-Ph-ofz" firstAttribute="top" secondItem="y3c-jy-aDJ" secondAttribute="bottom" constant="20" id="47D-M7-oVN"/>
                             <constraint firstItem="5Qg-gN-HhG" firstAttribute="trailing" secondItem="v4F-FA-VtI" secondAttribute="trailing" id="9Ww-mL-VUb"/>
                             <constraint firstItem="kUK-7C-jha" firstAttribute="leading" secondItem="QWt-VH-3yp" secondAttribute="trailing" constant="-68" id="FNI-L8-xXg"/>
                             <constraint firstItem="v4F-FA-VtI" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="8bC-Xf-vdC" secondAttribute="leadingMargin" constant="5" id="GD8-rT-Zjl"/>
                             <constraint firstItem="kUK-7C-jha" firstAttribute="leading" secondItem="QWt-VH-3yp" secondAttribute="leading" id="IeS-77-NUe"/>
+                            <constraint firstAttribute="centerX" secondItem="2n2-Ph-ofz" secondAttribute="centerX" id="Lir-3y-mUA"/>
                             <constraint firstItem="kUK-7C-jha" firstAttribute="leading" secondItem="QWt-VH-3yp" secondAttribute="leading" id="MmD-0r-JD8"/>
                             <constraint firstItem="QWt-VH-3yp" firstAttribute="top" secondItem="v4F-FA-VtI" secondAttribute="bottom" constant="46" id="QZg-3B-p1M"/>
-                            <constraint firstAttribute="centerX" secondItem="Ai5-sy-cDS" secondAttribute="centerX" id="Tp3-Py-cYb"/>
                             <constraint firstItem="kUK-7C-jha" firstAttribute="trailing" secondItem="v4F-FA-VtI" secondAttribute="trailing" id="U1S-il-yXU"/>
                             <constraint firstItem="kUK-7C-jha" firstAttribute="leading" secondItem="v4F-FA-VtI" secondAttribute="leading" id="bx0-lP-SNh"/>
                             <constraint firstItem="v4F-FA-VtI" firstAttribute="top" secondItem="5Qg-gN-HhG" secondAttribute="bottom" constant="22" id="gvJ-ez-9bz"/>
@@ -116,7 +98,7 @@
                         </variation>
                     </view>
                     <connections>
-                        <outlet property="activityIndicator" destination="Ai5-sy-cDS" id="jAx-RA-6k2"/>
+                        <outlet property="activityIndicator" destination="2n2-Ph-ofz" id="lg5-a8-2R0"/>
                         <outlet property="progressSlider" destination="kUK-7C-jha" id="aIS-FH-jiL"/>
                         <outlet property="solidButtonSwitch" destination="5Qg-gN-HhG" id="7wz-5d-0xk"/>
                         <outlet property="stateSelector" destination="v4F-FA-VtI" id="nDi-9A-ZY9"/>
@@ -127,9 +109,6 @@
         </scene>
     </scenes>
     <resources>
-        <image name="complete" width="24" height="24"/>
         <image name="inactive" width="24" height="24"/>
-        <image name="pause" width="24" height="24"/>
-        <image name="play" width="24" height="24"/>
     </resources>
 </document>
