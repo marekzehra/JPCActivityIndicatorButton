@@ -9,25 +9,49 @@
 import UIKit
 import JPCActivityIndicatorButton
 
+
+
+extension ViewController: UIPickerViewDataSource, UIPickerViewDelegate {
+    
+    func numberOfComponentsInPickerView(pickerView: UIPickerView) -> Int {
+        return 1
+    }
+    
+    func pickerView(pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
+        return self.states.count
+    }
+    
+    func pickerView(pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String! {
+        return states[row].name
+    }
+    
+    func pickerView(pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
+        activityIndicator.activityState = states[row]
+    }
+    
+}
+
+
+
 class ViewController: UIViewController {
 
     @IBOutlet var activityIndicator: ActivityIndicatorButton!
     
-    @IBOutlet var stateSelector: UISegmentedControl!
+    @IBOutlet var stateSelector: UIPickerView!
     @IBOutlet var solidButtonSwitch: UISwitch!
     @IBOutlet var progressSlider: UISlider!
     
+    var states = [
+        ActivityIndicatorButtonState(name: "Inactive", image: UIImage(named: "inactive")),
+        ActivityIndicatorButtonState(name: "Spinning", progressBarStyle: .Spinning),
+        ActivityIndicatorButtonState(name: "Progress Bar", image: UIImage(named: "paused"), progressBarStyle: .Percentage(value: 0)),
+        ActivityIndicatorButtonState(name: "Pasued", image: UIImage(named: "play")),
+        ActivityIndicatorButtonState(name: "Complete", tintColor: UIColor(red: 0.298, green: 0.686, blue: 0.314, alpha: 1.0), image: UIImage(named: "complete")),
+        ActivityIndicatorButtonState(name: "Error", tintColor: UIColor.redColor(), image: UIImage(named: "error"))
+    ]
     
     struct States {
-        static let defaultTintColor = UIColor.blueColor()
-        static let trackColor = UIColor.lightGrayColor()
-        
-        static let Inactive = ActivityIndicatorButtonState(image: UIImage(named: "inactive"))
-        static let Spinning = ActivityIndicatorButtonState(progressBarStyle: .Spinning)
-        static var Progress = ActivityIndicatorButtonState(image: UIImage(named: "paused"), progressBarStyle: .Percentage(value: 0))
-        static let Paused = ActivityIndicatorButtonState(image: UIImage(named: "play"))
-        static let Complete = ActivityIndicatorButtonState(tintColor: UIColor(red: 0.298, green: 0.686, blue: 0.314, alpha: 1.0), image: UIImage(named: "complete"))
-        static let Error = ActivityIndicatorButtonState(tintColor: UIColor.redColor(), image: UIImage(named: "error"))
+        static let Inactive = 0, Spinning = 1, ProgressBar = 2, Paused = 3, Complete = 4, Error = 5
     }
     
     
@@ -45,21 +69,21 @@ class ViewController: UIViewController {
     // MARK: Activity Button
     
     func nextState(state: ActivityIndicatorButtonState) -> ActivityIndicatorButtonState {
-        switch state {
-        case States.Inactive:
-            return States.Spinning
+        switch state.name! {
+        case "Inactive":
+            return states[States.Spinning]
             
-        case States.Spinning:
-            return States.Progress
+        case "Spinning":
+            return states[States.ProgressBar]
             
-        case States.Progress:
-            return States.Complete
+        case "Progress Bar":
+            return states[States.Paused]
             
-        case States.Paused:
-            return States.Progress
+        case "Paused":
+            return states[States.ProgressBar]
             
         default:
-            return States.Inactive
+            return states[States.Inactive]
         }
     }
     
@@ -109,25 +133,9 @@ class ViewController: UIViewController {
             
             self.activityIndicator.activityState = activityState
             
-            switch activityState {
-            case States.Inactive:
-                self.stateSelector.selectedSegmentIndex = 0
-                
-            case States.Spinning:
-                self.stateSelector.selectedSegmentIndex = 1
-                
-            case States.Progress:
-                self.stateSelector.selectedSegmentIndex = 2
-                
-            case States.Paused:
-                self.stateSelector.selectedSegmentIndex = 3
-                
-            case States.Complete:
-                self.stateSelector.selectedSegmentIndex = 4
-                
-            default:
-                self.stateSelector.selectedSegmentIndex = 5
-            }
+            var idx = find(states, activityState)
+            
+            self.stateSelector.selectRow(idx!, inComponent: 0, animated: true)
         }
     }
     
@@ -136,31 +144,9 @@ class ViewController: UIViewController {
         self.activityIndicator.style = sender.on ? .Solid : .Outline
     }
     
-    @IBAction func stateValueChanged(sender: UISegmentedControl) {
-        
-        var newState: ActivityIndicatorButtonState!
-        switch sender.selectedSegmentIndex {
-        case 0:
-            newState = States.Inactive
-        case 1:
-            newState = States.Spinning
-        case 2:
-            newState = States.Progress
-        case 3:
-            newState = States.Paused
-        case 4:
-            newState = States.Complete
-        default:
-            newState = States.Error
-        }
-        
-        activityIndicator.activityState = newState
-    }
-    
     @IBAction func progressValueChanged(sender: UISlider) {
-        if activityIndicator.activityState == States.Progress {
-            States.Progress.progressBarStyle = .Percentage(value: sender.value)
-            self.activityState = States.Progress
+        if activityIndicator.activityState.name == states[States.ProgressBar].name {
+            self.activityState.setProgress(sender.value)
         }
     }
 }

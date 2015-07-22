@@ -64,18 +64,24 @@ public enum ActivityIndicatorButtonProgressBarStyle: Equatable {
 
 public struct ActivityIndicatorButtonState: Equatable {
     
+    public let name: String?
     public var tintColor: UIColor?
     public var trackColor: UIColor?
     public var foregroundColor: UIColor?
     public var image: UIImage?
     public var progressBarStyle: ActivityIndicatorButtonProgressBarStyle
     
-    public init(tintColor: UIColor? = nil, trackColor: UIColor? = nil, foregroundColor: UIColor? = nil, image: UIImage? = nil, progressBarStyle: ActivityIndicatorButtonProgressBarStyle = .Inactive) {
+    public init(name: String? = nil, tintColor: UIColor? = nil, trackColor: UIColor? = nil, foregroundColor: UIColor? = nil, image: UIImage? = nil, progressBarStyle: ActivityIndicatorButtonProgressBarStyle = .Inactive) {
+        self.name = name
         self.tintColor = tintColor
         self.trackColor = trackColor
         self.foregroundColor = foregroundColor
         self.image = image
         self.progressBarStyle = progressBarStyle
+    }
+    
+    public mutating func setProgress(value: Float) {
+        self.progressBarStyle = .Percentage(value: value)
     }
 }
 
