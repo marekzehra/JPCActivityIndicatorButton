@@ -18,30 +18,48 @@ class ViewController: UIViewController {
     @IBOutlet var progressSlider: UISlider!
     
     
+    struct States {
+        static let defaultTintColor = UIColor.blueColor()
+        static let trackColor = UIColor.lightGrayColor()
+        
+        static let Inactive = ActivityIndicatorButtonState(tintColor: States.defaultTintColor, trackColor: States.trackColor, image: UIImage(named: "inactive"), progressBarStyle: .Inactive)
+        static let Spinning = ActivityIndicatorButtonState(tintColor: States.defaultTintColor, trackColor: States.trackColor, image: nil, progressBarStyle: .Spinning)
+        static var Progress = ActivityIndicatorButtonState(tintColor: States.defaultTintColor, trackColor: States.trackColor, image: UIImage(named: "paused"), progressBarStyle: .Percentage(value: 0))
+        static let Paused = ActivityIndicatorButtonState(tintColor: States.defaultTintColor, trackColor: States.trackColor, image: UIImage(named: "play"), progressBarStyle: .Inactive)
+        static let Complete = ActivityIndicatorButtonState(tintColor: UIColor(red: 0.298, green: 0.686, blue: 0.314, alpha: 1.0), trackColor: States.trackColor, image: UIImage(named: "complete"), progressBarStyle: .Inactive)
+        static let Error = ActivityIndicatorButtonState(tintColor: UIColor.redColor(), trackColor: States.trackColor, image: UIImage(named: "error"), progressBarStyle: .Inactive)
+    }
+    
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        self.activityIndicator.useSolidColorButtons = true
-        self.activityIndicator.progress = 0.45
-        self.activityIndicator.setTrackColor(UIColor.lightGrayColor(), forActivityStates: [.Spinning, .Progress])
-        self.activityIndicator.setTintColor(UIColor(red: 0.298, green: 0.686, blue: 0.314, alpha: 1.0), forActivityStates: [.Complete])
+        self.activityIndicator.style = .Solid
         
-        self.solidButtonSwitch.on = self.activityIndicator.useSolidColorButtons
-        self.progressSlider.value = self.activityIndicator.progress
+        self.solidButtonSwitch.on = self.activityIndicator.style == .Solid
+        self.progressSlider.value = 0
     }
     
     
     
     // MARK: Activity Button
     
-    func nextState(state: ActivityIndicatorButton.ActivityState) -> ActivityIndicatorButton.ActivityState {
+    func nextState(state: ActivityIndicatorButtonState) -> ActivityIndicatorButtonState {
         switch state {
-        case .Inactive: return .Spinning
-        case .Spinning: return .Progress
-        case .Progress: return .Paused
-        case .Paused: return .Progress
-        case .Complete: return .Inactive
+        case States.Inactive:
+            return States.Spinning
+            
+        case States.Spinning:
+            return States.Progress
+            
+        case States.Progress:
+            return States.Complete
+            
+        case States.Paused:
+            return States.Progress
+            
+        default:
+            return States.Inactive
         }
     }
     
@@ -72,9 +90,7 @@ class ViewController: UIViewController {
     @IBAction func touchUpInside(sender: AnyObject) {
         println("TOUCH UP INSIDE")
         
-        let state = nextState(self.activityIndicator.activityState)
-        self.activityIndicator.transition(toActivityState: state, animated: true)
-        self.setSliderActivityState(state)
+        self.activityState = nextState(self.activityIndicator.activityState)
     }
     
     @IBAction func touchUpOutside(sender: AnyObject) {
@@ -85,47 +101,67 @@ class ViewController: UIViewController {
     
     // MARK: Controls
     
-    func setSliderActivityState(state: ActivityIndicatorButton.ActivityState) {
-        switch state {
-        case .Inactive:
-            self.stateSelector.selectedSegmentIndex = 0
-        case .Spinning:
-            self.stateSelector.selectedSegmentIndex = 1
-        case .Progress:
-            self.stateSelector.selectedSegmentIndex = 2
-        case .Paused:
-            self.stateSelector.selectedSegmentIndex = 3
-        case .Complete:
-            self.stateSelector.selectedSegmentIndex = 4
+    var activityState: ActivityIndicatorButtonState {
+        get {
+            return self.activityIndicator.activityState
+        }
+        set {
+            
+            self.activityIndicator.activityState = activityState
+            
+            switch activityState {
+            case States.Inactive:
+                self.stateSelector.selectedSegmentIndex = 0
+                
+            case States.Spinning:
+                self.stateSelector.selectedSegmentIndex = 1
+                
+            case States.Progress:
+                self.stateSelector.selectedSegmentIndex = 2
+                
+            case States.Paused:
+                self.stateSelector.selectedSegmentIndex = 3
+                
+            case States.Complete:
+                self.stateSelector.selectedSegmentIndex = 4
+                
+            default:
+                self.stateSelector.selectedSegmentIndex = 5
+            }
         }
     }
     
+    
     @IBAction func solidButtonChanged(sender: UISwitch) {
-        self.activityIndicator.useSolidColorButtons = sender.on
-        self.activityIndicator.transition(toActivityState: self.activityIndicator.activityState, animated: false)
+        self.activityIndicator.style = sender.on ? .Solid : .Outline
     }
     
     @IBAction func stateValueChanged(sender: UISegmentedControl) {
         
-        var newState: ActivityIndicatorButton.ActivityState!
+        var newState: ActivityIndicatorButtonState!
         switch sender.selectedSegmentIndex {
         case 0:
-            newState = .Inactive
+            newState = States.Inactive
         case 1:
-            newState = .Spinning
+            newState = States.Spinning
         case 2:
-            newState = .Progress
+            newState = States.Progress
         case 3:
-            newState = .Paused
+            newState = States.Paused
+        case 4:
+            newState = States.Complete
         default:
-            newState = .Complete
+            newState = States.Error
         }
         
-        activityIndicator.transition(toActivityState: newState, animated: true)
+        activityIndicator.activityState = newState
     }
     
     @IBAction func progressValueChanged(sender: UISlider) {
-        activityIndicator.progress = sender.value // Don't use animation here. (Or in any situation where there will be continuous updates. It won't crash but its not neccessary)
+        if activityIndicator.activityState == States.Progress {
+            States.Progress.progressBarStyle = .Percentage(value: sender.value)
+            self.activityState = States.Progress
+        }
     }
 }
 

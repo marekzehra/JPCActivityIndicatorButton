@@ -12,6 +12,7 @@
 		FD11520C1B4AD240005F0232 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = FD11520A1B4AD240005F0232 /* Main.storyboard */; };
 		FD11520E1B4AD240005F0232 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = FD11520D1B4AD240005F0232 /* Images.xcassets */; };
 		FD1152111B4AD240005F0232 /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = FD11520F1B4AD240005F0232 /* LaunchScreen.xib */; };
+		FDA669101B5EC80F00A882CD /* JPCActivityIndicatorButton.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FD1152321B4AD27F005F0232 /* JPCActivityIndicatorButton.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -28,6 +29,13 @@
 			proxyType = 2;
 			remoteGlobalIDString = FD1151891B4ACAC3005F0232;
 			remoteInfo = JPCActivityIndicatorButtonTests;
+		};
+		FDA6690C1B5EC80900A882CD /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = FD11522C1B4AD27F005F0232 /* JPCActivityIndicatorButton.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = FD11517D1B4ACAC2005F0232;
+			remoteInfo = JPCActivityIndicatorButton;
 		};
 /* End PBXContainerItemProxy section */
 
@@ -49,6 +57,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FDA669101B5EC80F00A882CD /* JPCActivityIndicatorButton.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -134,6 +143,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				FDA6690D1B5EC80900A882CD /* PBXTargetDependency */,
 			);
 			name = zExamples;
 			productName = Examples;
@@ -219,6 +229,14 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		FDA6690D1B5EC80900A882CD /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = JPCActivityIndicatorButton;
+			targetProxy = FDA6690C1B5EC80900A882CD /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
 		FD11520A1B4AD240005F0232 /* Main.storyboard */ = {
