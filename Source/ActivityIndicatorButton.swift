@@ -483,6 +483,7 @@ public class ActivityIndicatorButton: UIControl {
         switch self.activityState.progressBarStyle {
         case .Percentage(let value):
             
+//            debugPrintln("PROGRESS: \(value)")
             if animated {
                 let anim = CABasicAnimation(keyPath: "strokeEnd")
                 anim.fromValue = prevValue

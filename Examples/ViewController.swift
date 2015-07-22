@@ -130,12 +130,10 @@ class ViewController: UIViewController {
             return self.activityIndicator.activityState
         }
         set {
+            self.activityIndicator.activityState = newValue
             
-            self.activityIndicator.activityState = activityState
-            
-            var idx = find(states, activityState)
-            
-            self.stateSelector.selectRow(idx!, inComponent: 0, animated: true)
+            var idx = find(states, activityState)!
+            self.stateSelector.selectRow(idx, inComponent: 0, animated: true)
         }
     }
     
@@ -146,7 +144,8 @@ class ViewController: UIViewController {
     
     @IBAction func progressValueChanged(sender: UISlider) {
         if activityIndicator.activityState.name == states[States.ProgressBar].name {
-            self.activityState.setProgress(sender.value)
+            states[States.ProgressBar].setProgress(sender.value)
+            self.activityState = states[States.ProgressBar]
         }
     }
 }
