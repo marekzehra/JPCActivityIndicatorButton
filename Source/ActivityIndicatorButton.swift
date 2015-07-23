@@ -49,27 +49,61 @@ private extension CGRect {
 
 
 
+/**
+Defines the Style of the button.
+
+- Outline: For this style the button is clear. The image is tinted based on the current tint color. The button "track" outlines the image. This is comparible to the App Store download button.
+- Solid:   In this style the button has a solid background.  The background color is the current tint color and the image is tinted with the current foreground color. This is comparible to Google Material Design.
+*/
 public enum ActivityIndicatorButtonStyle {
     case Outline, Solid
 }
 
-public enum ActivityIndicatorButtonAnimationStyle {
-    case Fade, Expand
-}
+/**
+Defines the state of the spinning and progress animations.
 
+- Inactive:   No activity. In this state the ActivityIndicatorButton acts only like a button.
+- Spinning:   A spinner analogous to UIActivityIndicator is animated around the bounds of the button.
+- Percentage: A circular progress bar surrounds the button. The value represents the percentage filled.
+*/
 public enum ActivityIndicatorButtonProgressBarStyle: Equatable {
     case Inactive, Spinning, Percentage(value: Float)
 }
 
+/**
+*  This struct defines the current state of an ActivityIndicatorButton.
+*/
 public struct ActivityIndicatorButtonState: Equatable {
-    
+  
+    /// An optional property to help identify this button. Does not effect rendering is any way. Must be set to use the "SavedStates" feature.
     public let name: String?
+    
+    /// If this is set it will override the tintColor property on the button.
     public var tintColor: UIColor?
+    
+    /// If this is set it will override the "normalTrackColor" property on the button.
     public var trackColor: UIColor?
+    
+    /// If this is set it will override the "normalforegroundColor" property on the button.
     public var foregroundColor: UIColor?
+    
+    /// Optionally provide an image for this state. It is centered in the button.
     public var image: UIImage?
+    
+    /// The activity state of the button. 
+    /// :see: ActivityIndicatorButtonProgressBarStyle
     public var progressBarStyle: ActivityIndicatorButtonProgressBarStyle
     
+    /**
+    Default initializer. No properties are required. All have default values.
+    
+    :param: name             Default value is nil
+    :param: tintColor        Default value is nil
+    :param: trackColor       Default value is nil
+    :param: foregroundColor  Default value is nil
+    :param: image            Default value is nil
+    :param: progressBarStyle Default value is .Inactive
+    */
     public init(name: String? = nil, tintColor: UIColor? = nil, trackColor: UIColor? = nil, foregroundColor: UIColor? = nil, image: UIImage? = nil, progressBarStyle: ActivityIndicatorButtonProgressBarStyle = .Inactive) {
         self.name = name
         self.tintColor = tintColor
@@ -79,11 +113,19 @@ public struct ActivityIndicatorButtonState: Equatable {
         self.progressBarStyle = progressBarStyle
     }
     
+    /**
+    Convenience function to set the progressBarStyle to .Percentage(value: value)
+    */
     public mutating func setProgress(value: Float) {
         self.progressBarStyle = .Percentage(value: value)
     }
 }
 
+
+
+/*
+We need to have custom support for Equatable since on of our states has an input argument.
+*/
 public func == (lhs: ActivityIndicatorButtonProgressBarStyle, rhs: ActivityIndicatorButtonProgressBarStyle) -> Bool {
     switch lhs {
     case .Inactive:
@@ -119,12 +161,12 @@ public func == (lhs: ActivityIndicatorButtonState, rhs: ActivityIndicatorButtonS
 
 
 
+
+
 @IBDesignable
 public class ActivityIndicatorButton: UIControl {
 
 
-    
-    
     
     
     // MARK: - Public API
@@ -133,8 +175,14 @@ public class ActivityIndicatorButton: UIControl {
     
     // MARK: State
     
-    public var _activityState: ActivityIndicatorButtonState = ActivityIndicatorButtonState(progressBarStyle: .Inactive)
+    /// Internal storage of activityState
+    private var _activityState: ActivityIndicatorButtonState = ActivityIndicatorButtonState(progressBarStyle: .Inactive)
     
+    
+    /// Set the ActivityIndicatorButtonState.
+    /// You may set custom defined activity states or directly modify the values here.
+    /// Animation is implicit. (i.e. this is equivalent to calling transitionActivityState(toState: animated: true)
+    /// :see: transitionActivityState(toState:animated:)
     public var activityState: ActivityIndicatorButtonState {
         get {
             return _activityState
@@ -145,12 +193,19 @@ public class ActivityIndicatorButton: UIControl {
         }
     }
     
+    /**
+    Set activityState with optional animation
     
+    :see: activityState
+    */
     public func transitionActivityState(toState: ActivityIndicatorButtonState, animated: Bool = true) {
         self._activityState = toState
         self.updateForNextActivityState(animated: animated)
     }
     
+    /// Returns the tintColor that is currently being used. If the current state provides no tint color self.tintColor is returned.
+    /// :see: activityState
+    /// :see: ActivityIndicatorButtonState
     public var tintColorForCurrentActivityState: UIColor {
         if let color = self.activityState.tintColor {
             return color
@@ -158,6 +213,9 @@ public class ActivityIndicatorButton: UIControl {
         return self.tintColor
     }
     
+    /// Returns the trackColor that is currently being used. If the current state provides no tint color self.normalTrackColor is returned.
+    /// :see: activityState
+    /// :see: ActivityIndicatorButtonState
     public var trackColorForCurrentActivityState: UIColor {
         if let color = self.activityState.trackColor {
             return color
@@ -165,6 +223,9 @@ public class ActivityIndicatorButton: UIControl {
         return self.normalTrackColor
     }
     
+    /// Returns the foregroundColor that is currently being used. If the current state provides no tint color self.normalForegroundColor is returned.
+    /// :see: activityState
+    /// :see: ActivityIndicatorButtonState
     public var foregroundColorForCurrentActivityState: UIColor {
         if let color = self.activityState.foregroundColor {
             return color
@@ -172,18 +233,35 @@ public class ActivityIndicatorButton: UIControl {
         return self.normalForegroundColor
     }
     
+    
+    /// The color of the outline around the button. A track for the Progress Bar.
+    /// This value may be overridden in ActivityIndicatorButtonState
+    /// :see: activityState
+    /// :see: ActivityIndicatorButtonState
+    /// :see: trackColorForCurrentActivityState
     @IBInspectable public var normalTrackColor: UIColor = UIColor.lightGrayColor() {
         didSet {
             updateAllColors()
         }
     }
     
+    
+    /// The color of the image. Ignored when style == .Outline.
+    /// This value may be overridden in ActivityIndicatorButtonState
+    /// :see: activityState
+    /// :see: ActivityIndicatorButtonState
+    /// :see: foregroundColorForCurrentActivityState
     @IBInspectable public var normalForegroundColor: UIColor = UIColor.whiteColor() {
         didSet {
             updateAllColors()
         }
     }
     
+    
+    /// Set the image of the current activityState
+    /// This is equivalent to creating a new ActivityIndicatorButtonState and setting it to activityState
+    /// :see: activityState
+    /// :see: ActivityIndicatorButtonState
     @IBInspectable public var image: UIImage? {
         get {
             return self.activityState.image
@@ -226,13 +304,12 @@ public class ActivityIndicatorButton: UIControl {
     
     
     /// If true the circular background of this control is colored with the tint color and the image is colored white. Otherwise the background is clear and the image is tinted. Image color is only adjusted if it is a template image.
+    /// :see: ActivityIndicatorButtonStyle
     @IBInspectable public var style: ActivityIndicatorButtonStyle = .Solid {
         didSet {
             self.updateAllColors()
         }
     }
-    
-    @IBInspectable public var animationStyle: ActivityIndicatorButtonAnimationStyle = .Expand
     
     
     
@@ -242,12 +319,21 @@ public class ActivityIndicatorButton: UIControl {
     
     // MARK: - State Management
     
+    /// Internal storage of saved states
     private var savedStates: [String : ActivityIndicatorButtonState] = [:]
     
+    /// The number of ActivityIndicatorButtonState stored
     public var savedStatesCount: Int {
         return savedStates.count
     }
     
+    /**
+    Store an ActivityIndicatorButtonState for simple access
+    
+    :param: name The key used to store the state. It doesn't have to be equal to state.name but it is probably good practice. For this API the name property on state is not required.
+    
+    :returns: The ActivityIndicatorButtonState or nil if a saved state could not be found.
+    */
     public subscript (name: String) -> ActivityIndicatorButtonState? {
         get {
             return savedStates[name]
@@ -257,6 +343,11 @@ public class ActivityIndicatorButton: UIControl {
         }
     }
     
+    /**
+    Convenience API for saving a group of states.
+    
+    :param: states An array of states. The name property MUST be set.  If not an assertion is triggered.  The states are keyed based on the value of "name".
+    */
     public func saveStates(states: [ActivityIndicatorButtonState]) {
         for aState in states {
             assert(aState.name != nil, "All saved states must have a name")
@@ -264,6 +355,14 @@ public class ActivityIndicatorButton: UIControl {
         }
     }
     
+    /**
+    Convenience API for setting a saved state. Equivalent to button.activityState = button["name of state"]
+    
+    :param: name     The key used to access the saved state
+    :param: animated If animated is desired
+    
+    :returns: True is the state was found in saved states. 
+    */
     public func transitionSavedState(name: String, animated: Bool = true) -> Bool {
         if let state = self[name] {
             self.transitionActivityState(state, animated: animated)
