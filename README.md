@@ -237,5 +237,25 @@ button.transitionSavedState(Names.ProgressBar)
 
 
 
+### Ripple and Shadow Animations
+
+When tapped the activity button creates a ripple animation and bounces the button.  That effect can be adjusted or turned off.  All these properties are accessible in Storyboard.
+
+``` swift 
+/// The distance past the edge of the button which the ripple animation will propagate on touch up and touch down
+button.hitAnimationDistance = 5
+
+/// The duration of the ripple hit animation
+button.hitAnimationDuration = 0.5
+
+/// The color of the touch down and touch up ripple animation
+button.hitAnimationColor = UIColor.grayColor().colorWithAlphaComponent(0.5)  // Set to UIColor.clearColor() to remove the animation
+```
+
+To edit shadow...
+``` swift
+button.shadowColor = UIColor.blackColor()  // Set to UIColor.clearColor() to remove
+```
+
 
 
