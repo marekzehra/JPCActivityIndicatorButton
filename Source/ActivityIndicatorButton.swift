@@ -315,6 +315,32 @@ public class ActivityIndicatorButton: UIControl {
     
     
     
+    // MARK: UI Configuration
+    
+    @IBInspectable public var progressBarWidth: CGFloat = 3 {
+        didSet {
+            self.updateButtonConstains()
+            self.updateForCurrentBounds()
+        }
+    }
+    
+    @IBInspectable public var trackWidth: CGFloat = 1.5 {
+        didSet {
+            self.updateButtonConstains()
+            self.updateForCurrentBounds()
+        }
+    }
+    
+    @IBInspectable public var minimumImagePadding: CGFloat = 5 {
+        didSet {
+            self.updateButtonConstains()
+            self.updateForCurrentBounds()
+        }
+    }
+    
+    
+    
+    
     
     
     // MARK: - State Management
@@ -410,12 +436,8 @@ public class ActivityIndicatorButton: UIControl {
     struct Constants {
         struct Layout {
             static let outerPadding: CGFloat = 1
-            static let progressWidth: CGFloat = 2.5
-            static let trackWidth: CGFloat = 1
             /// The intrinsicContentSize if no images are provided. If images are provided this is the intrinsicContentSize.
             static let defaultContentSize: CGSize = CGSizeMake(35.0, 35.0)
-            /// For intrinsicContentSize calculations this is the padding between the image and the background.
-            static let minimumImagePadding: CGFloat = 5
         }
         struct Track {
             static let StartAngle = CGFloat(-M_PI_2)  // Start angle is pointing directly upwards on the screen. This is where progress animations will begin
@@ -792,10 +814,8 @@ public class ActivityIndicatorButton: UIControl {
         
         self.progressView.progressLayer.strokeColor = tintColor
         self.progressView.progressLayer.fillColor = clear
-        self.progressView.progressLayer.lineWidth = Constants.Layout.progressWidth
         
         self.backgroundView.shapeLayer.strokeColor = trackColor
-        self.backgroundView.shapeLayer.lineWidth = Constants.Layout.trackWidth
     }
     
     private func updateAllColors() {
@@ -882,7 +902,7 @@ public class ActivityIndicatorButton: UIControl {
             let progressRadius = min(self.progressView.frame.width, self.progressView.frame.height) * 0.5
             return UIBezierPath(
                 arcCenter: self.progressView.bounds.center,
-                radius: progressRadius - Constants.Layout.progressWidth * 0.5,
+                radius: progressRadius - progressBarWidth * 0.5,
                 startAngle: Constants.Track.StartAngle,
                 endAngle: Constants.Track.EndAngle,
                 clockwise: true).CGPath
@@ -914,6 +934,8 @@ public class ActivityIndicatorButton: UIControl {
     }
     
 
+    private var buttonConstraints = [NSLayoutConstraint]()
+    
     /**
     Should be called once and only once. Adds layers to view heirarchy.
     */
@@ -937,17 +959,16 @@ public class ActivityIndicatorButton: UIControl {
         self.addSubview(self.imageView)
         self.addSubview(self.progressView)
 
-        let views = ["bg" : self.backgroundView, "progress" : self.progressView]
-        let metrics: [String : NSNumber] = ["OUTER" : Constants.Layout.outerPadding, "INNER" : Constants.Layout.outerPadding + Constants.Layout.progressWidth + 0.5 * Constants.Layout.trackWidth] // The "INNER" padding is the distance between the bounds and the track. Have to add the width of the progress and the half of the track (the track is the stroke of the background view)
+        let views = ["progress" : self.progressView]
+        let metrics: [String : NSNumber] = ["OUTER" : Constants.Layout.outerPadding]
         
         self.addConstraints(NSLayoutConstraint.constraintsWithVisualFormat("H:|-(OUTER)-[progress]-(OUTER)-|", options: NSLayoutFormatOptions.allZeros, metrics: metrics, views: views))
         self.addConstraints(NSLayoutConstraint.constraintsWithVisualFormat("V:|-(OUTER)-[progress]-(OUTER)-|", options: NSLayoutFormatOptions.allZeros, metrics: metrics, views: views))
 
         self.addConstraint(NSLayoutConstraint(item: self.imageView, attribute: .CenterX, relatedBy: .Equal, toItem: self, attribute: .CenterX, multiplier: 1.0, constant: 0.0))
         self.addConstraint(NSLayoutConstraint(item: self.imageView, attribute: .CenterY, relatedBy: .Equal, toItem: self, attribute: .CenterY, multiplier: 1.0, constant: 0.0))
-
-        self.addConstraints(NSLayoutConstraint.constraintsWithVisualFormat("H:|-(INNER)-[bg]-(INNER)-|", options: NSLayoutFormatOptions.allZeros, metrics: metrics, views: views))
-        self.addConstraints(NSLayoutConstraint.constraintsWithVisualFormat("V:|-(INNER)-[bg]-(INNER)-|", options: NSLayoutFormatOptions.allZeros, metrics: metrics, views: views))
+        
+        updateButtonConstains()
         
         // Set up imageViewMask
         
@@ -961,13 +982,32 @@ public class ActivityIndicatorButton: UIControl {
         layer.shadowOpacity = 0.5
         layer.masksToBounds = false
     }
-
-
+    
+    /**
+    The button constraints may change is progress bar or track width is changed. This method will handle updates
+    */
+    private func updateButtonConstains() {
+        
+        // Clear old constraints
+        self.removeConstraints(buttonConstraints)
+        
+        let views = ["bg" : self.backgroundView]
+        // The "INNER" padding is the distance between the bounds and the track. Have to add the width of the progress and the half of the track (the track is the stroke of the background view)
+        let metrics: [String : NSNumber] = ["INNER" : Constants.Layout.outerPadding + progressBarWidth + 0.5 * trackWidth]
+        
+        buttonConstraints += NSLayoutConstraint.constraintsWithVisualFormat("H:|-(INNER)-[bg]-(INNER)-|", options: NSLayoutFormatOptions.allZeros, metrics: metrics, views: views) as! [NSLayoutConstraint]
+        buttonConstraints += NSLayoutConstraint.constraintsWithVisualFormat("V:|-(INNER)-[bg]-(INNER)-|", options: NSLayoutFormatOptions.allZeros, metrics: metrics, views: views) as! [NSLayoutConstraint]
+        
+        self.addConstraints(buttonConstraints)
+    }
+    
     /**
     Should be called when bounds change to update paths of shape layers.
     */
     private func updateForCurrentBounds() {
-
+        
+        self.progressView.progressLayer.lineWidth = progressBarWidth
+        self.backgroundView.shapeLayer.lineWidth = trackWidth
         self.progressView.progressLayer.path = self.progressLayerPath
         self.backgroundView.shapeLayer.path = self.backgroundLayerPath
         self.imageViewMask.path = self.imageViewMaskPath
@@ -984,7 +1024,7 @@ public class ActivityIndicatorButton: UIControl {
         var maxW: CGFloat = Constants.Layout.defaultContentSize.width
         var maxH: CGFloat = Constants.Layout.defaultContentSize.height
 
-        let padding = 2 * (Constants.Layout.minimumImagePadding + Constants.Layout.trackWidth + Constants.Layout.progressWidth + Constants.Layout.outerPadding)
+        let padding = 2 * (minimumImagePadding + trackWidth + progressBarWidth + Constants.Layout.outerPadding)
 
         if let imageSize = self.activityState.image?.size {
             maxW = max(imageSize.width, maxW) + padding

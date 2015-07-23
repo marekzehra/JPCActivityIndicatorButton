@@ -90,8 +90,8 @@ class ViewController: UIViewController {
             ActivityIndicatorButtonState(name: Names.Spinning, progressBarStyle: .Spinning),
             ActivityIndicatorButtonState(name: Names.ProgressBar, image: UIImage(named: "paused"), progressBarStyle: .Percentage(value: 0)),
             ActivityIndicatorButtonState(name: Names.Paused, image: UIImage(named: "play"), progressBarStyle: .Percentage(value: 0)),
-            ActivityIndicatorButtonState(name: Names.Complete, tintColor: UIColor(red:0.11, green:0.91, blue:0.71, alpha:1.0), image: UIImage(named: "complete")),
-            ActivityIndicatorButtonState(name: Names.Error, tintColor: UIColor(red:0.96, green:0.26, blue:0.21, alpha:1.0), image: UIImage(named: "error"))
+            ActivityIndicatorButtonState(name: Names.Complete, tintColor: UIColor(red:0.0, green:0.78, blue:0.33, alpha:1.0), image: UIImage(named: "complete")),
+            ActivityIndicatorButtonState(name: Names.Error, tintColor: UIColor(red:0.84, green:0.0, blue:0.0, alpha:1.0), image: UIImage(named: "error"))
         ])
         
         self.solidButtonSwitch.on = self.activityIndicator.style == .Solid
