@@ -317,6 +317,7 @@ public class ActivityIndicatorButton: UIControl {
     
     // MARK: UI Configuration
     
+    /// The width of the circular progress bar / activity indicator
     @IBInspectable public var progressBarWidth: CGFloat = 3 {
         didSet {
             self.updateButtonConstains()
@@ -324,6 +325,7 @@ public class ActivityIndicatorButton: UIControl {
         }
     }
     
+    /// The width of the track outline separating the progress bar from the button
     @IBInspectable public var trackWidth: CGFloat = 1.5 {
         didSet {
             self.updateButtonConstains()
@@ -331,6 +333,7 @@ public class ActivityIndicatorButton: UIControl {
         }
     }
     
+    /// The minimum amount of padding between the image and the side of the button
     @IBInspectable public var minimumImagePadding: CGFloat = 5 {
         didSet {
             self.updateButtonConstains()
