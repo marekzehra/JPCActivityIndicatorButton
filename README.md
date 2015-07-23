@@ -16,8 +16,6 @@ It is a drop in replacement for UIActivityIndicatorView and UIProgressView that 
 ### Material Design Style
 ![example2](Images/demo_solid.gif)
 
-There is a slight border between the progress bar and the button that I'm calling the "track" however it is hard to see in this GIF.
-
 ---
 
 
