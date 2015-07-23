@@ -88,7 +88,7 @@ class ViewController: UIViewController {
         self.activityIndicator.saveStates([
             ActivityIndicatorButtonState(name: Names.Inactive, image: UIImage(named: "inactive")),
             ActivityIndicatorButtonState(name: Names.Spinning, progressBarStyle: .Spinning),
-            ActivityIndicatorButtonState(name: Names.ProgressBar, image: UIImage(named: "paused"), progressBarStyle: .Percentage(value: 0)),
+            ActivityIndicatorButtonState(name: Names.ProgressBar, image: UIImage(named: "pause"), progressBarStyle: .Percentage(value: 0)),
             ActivityIndicatorButtonState(name: Names.Paused, image: UIImage(named: "play"), progressBarStyle: .Percentage(value: 0)),
             ActivityIndicatorButtonState(name: Names.Complete, tintColor: UIColor(red:0.0, green:0.78, blue:0.33, alpha:1.0), image: UIImage(named: "complete")),
             ActivityIndicatorButtonState(name: Names.Error, tintColor: UIColor(red:0.84, green:0.0, blue:0.0, alpha:1.0), image: UIImage(named: "error"))
