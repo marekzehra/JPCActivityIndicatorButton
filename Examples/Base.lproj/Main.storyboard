@@ -48,7 +48,7 @@
                                     <outlet property="delegate" destination="BYZ-38-t0r" id="CVf-ob-iwN"/>
                                 </connections>
                             </pickerView>
-                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="U0g-eS-Dxe" customClass="ActivityIndicatorButton" customModule="JPCActivityIndicatorButton">
+                            <view contentMode="scaleToFill" ambiguous="YES" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="U0g-eS-Dxe" customClass="ActivityIndicatorButton" customModule="JPCActivityIndicatorButton">
                                 <rect key="frame" x="272" y="40" width="56" height="56"/>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                 <color key="tintColor" red="0.0" green="0.72156862745098038" blue="0.83137254901960778" alpha="1" colorSpace="calibratedRGB"/>
