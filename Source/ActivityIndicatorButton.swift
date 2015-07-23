@@ -291,7 +291,7 @@ public class ActivityIndicatorButton: UIControl {
     /// The duration of the ripple hit animation
     @IBInspectable public var hitAnimationDuration: CFTimeInterval = 0.5
     
-    /// The color of the touch down and touch up ripple animation. Default value is UIColor.grayColor().colorWithAlphaComponent(0.25).
+    /// The color of the touch down and touch up ripple animation. Default value is UIColor.grayColor().colorWithAlphaComponent(0.5).
     @IBInspectable public var hitAnimationColor: UIColor = UIColor.grayColor().colorWithAlphaComponent(0.5)
     
     
