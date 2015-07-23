@@ -11,10 +11,10 @@ It is a drop in replacement for UIActivityIndicatorView and UIProgressView that 
 * To create a similar interaction as start and stopping downloads in the App Store app. 
 
 ### Default "App Store" style
-![example](Images/demo_normal.gif)
+![outline](Images/demo_normal.gif)
 
 ### Material Design Style
-![example2](Images/demo_solid.gif)
+![solid](Images/demo_solid.gif)
 
 ---
 
@@ -36,6 +36,7 @@ Copy ActivityIndicatorButton.swift into your project
 
 This control may be used in Storyboard or programmically.  It is IBDesignable so you can see a preview and edit its properties directly from interface builder.  Just add a UIView and change its type to "ActivityIndicatorButton".
 
+### Programmatically
 ``` swift 
 import JPCActivityIndicatorButton // Only if you use Pods or build as a module! (Which you should)
 
@@ -43,6 +44,12 @@ import JPCActivityIndicatorButton // Only if you use Pods or build as a module! 
 
 let button = ActivityIndicatorButton(frame: CGRectZero)
 ```
+
+### Storyboard
+
+![storyboard](Images/Storyboard.png)
+
+
 
 ### Layout
 
@@ -56,7 +63,7 @@ It inherits from UIControl so set touch events just like you would a UIButton.
 ### Components
 The button consists of 4 components: progress bar, track, button, and image.  Heres how the colors are applied.
 
-![example3](Images/Colors.png)
+![colors](Images/Colors.png)
 
 #### Style
 
