@@ -51,16 +51,26 @@
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="2n2-Ph-ofz" customClass="ActivityIndicatorButton" customModule="JPCActivityIndicatorButton">
                                 <rect key="frame" x="273" y="40" width="54" height="54"/>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
-                                <color key="tintColor" red="0.57673509170000004" green="0.86632265870000003" blue="1" alpha="1" colorSpace="calibratedRGB"/>
+                                <color key="tintColor" red="0.0" green="0.73725490196078436" blue="0.83137254901960778" alpha="1" colorSpace="calibratedRGB"/>
                                 <userDefinedRuntimeAttributes>
                                     <userDefinedRuntimeAttribute type="image" keyPath="image" value="inactive"/>
                                     <userDefinedRuntimeAttribute type="color" keyPath="normalTrackColor">
-                                        <color key="value" red="0.49658771198306872" green="0.23464423986249838" blue="1" alpha="1" colorSpace="calibratedRGB"/>
+                                        <color key="value" red="0.4416953797331491" green="0.4416953797331491" blue="0.4416953797331491" alpha="1" colorSpace="calibratedRGB"/>
                                     </userDefinedRuntimeAttribute>
                                     <userDefinedRuntimeAttribute type="color" keyPath="normalForegroundColor">
-                                        <color key="value" red="1" green="0.59992035478386385" blue="0.60274876946181166" alpha="1" colorSpace="calibratedRGB"/>
+                                        <color key="value" red="0.90980392156862744" green="0.91764705882352937" blue="0.96470588235294119" alpha="1" colorSpace="calibratedRGB"/>
                                     </userDefinedRuntimeAttribute>
                                 </userDefinedRuntimeAttributes>
+                                <connections>
+                                    <action selector="touchDown:" destination="BYZ-38-t0r" eventType="touchDown" id="tWM-sR-JTW"/>
+                                    <action selector="touchDownRepeat:" destination="BYZ-38-t0r" eventType="touchDownRepeat" id="fFC-Tn-3Bw"/>
+                                    <action selector="touchDragEnter:" destination="BYZ-38-t0r" eventType="touchDragEnter" id="ETO-Ug-Tcp"/>
+                                    <action selector="touchDragExit:" destination="BYZ-38-t0r" eventType="touchDragExit" id="QQk-tE-Dbn"/>
+                                    <action selector="touchDragInside:" destination="BYZ-38-t0r" eventType="touchDragInside" id="Lbk-P5-MoH"/>
+                                    <action selector="touchDragOutside:" destination="BYZ-38-t0r" eventType="touchDragOutside" id="huz-rD-LGF"/>
+                                    <action selector="touchUpInside:" destination="BYZ-38-t0r" eventType="touchUpInside" id="TXd-KR-DwE"/>
+                                    <action selector="touchUpOutside:" destination="BYZ-38-t0r" eventType="touchUpOutside" id="H4g-O5-del"/>
+                                </connections>
                             </view>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
@@ -91,6 +101,7 @@
                     </view>
                     <connections>
                         <outlet property="activityIndicator" destination="2n2-Ph-ofz" id="lg5-a8-2R0"/>
+                        <outlet property="progressLabel" destination="QWt-VH-3yp" id="uNW-T7-8zS"/>
                         <outlet property="progressSlider" destination="kUK-7C-jha" id="aIS-FH-jiL"/>
                         <outlet property="solidButtonSwitch" destination="5Qg-gN-HhG" id="7wz-5d-0xk"/>
                         <outlet property="stateSelector" destination="EYO-ry-qMi" id="zEu-9o-ySR"/>

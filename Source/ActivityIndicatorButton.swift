@@ -44,7 +44,6 @@ private extension CGRect {
             return CGPoint(x: self.midX, y: self.midY)
         }
     }
-    
 }
 
 
@@ -234,6 +233,46 @@ public class ActivityIndicatorButton: UIControl {
     }
     
     @IBInspectable public var animationStyle: ActivityIndicatorButtonAnimationStyle = .Expand
+    
+    
+    
+    
+    
+    
+    
+    // MARK: - State Management
+    
+    private var savedStates: [String : ActivityIndicatorButtonState] = [:]
+    
+    public var savedStatesCount: Int {
+        return savedStates.count
+    }
+    
+    public subscript (name: String) -> ActivityIndicatorButtonState? {
+        get {
+            return savedStates[name]
+        }
+        set {
+            savedStates[name] = newValue
+        }
+    }
+    
+    public func saveStates(states: [ActivityIndicatorButtonState]) {
+        for aState in states {
+            assert(aState.name != nil, "All saved states must have a name")
+            self[aState.name!] = aState
+        }
+    }
+    
+    public func transitionSavedState(name: String, animated: Bool = true) -> Bool {
+        if let state = self[name] {
+            self.transitionActivityState(state, animated: animated)
+            return true
+        }
+        return false
+    }
+    
+    
     
     
     

@@ -18,18 +18,20 @@ extension ViewController: UIPickerViewDataSource, UIPickerViewDelegate {
     }
     
     func pickerView(pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
-        return self.states.count
+        return activityIndicator.savedStatesCount
     }
     
     func pickerView(pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String! {
-        return states[row].name
+        return activityIndicator[mapStateForIdx(row)]!.name!
     }
     
     func pickerView(pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
-        activityIndicator.activityState = states[row]
+        activityIndicator.transitionSavedState(mapStateForIdx(row), animated: true)
+        updateForPickerActivityState()
     }
     
 }
+
 
 
 
@@ -39,19 +41,42 @@ class ViewController: UIViewController {
     
     @IBOutlet var stateSelector: UIPickerView!
     @IBOutlet var solidButtonSwitch: UISwitch!
+    @IBOutlet var progressLabel: UILabel!
     @IBOutlet var progressSlider: UISlider!
     
-    var states = [
-        ActivityIndicatorButtonState(name: "Inactive", image: UIImage(named: "inactive")),
-        ActivityIndicatorButtonState(name: "Spinning", progressBarStyle: .Spinning),
-        ActivityIndicatorButtonState(name: "Progress Bar", image: UIImage(named: "paused"), progressBarStyle: .Percentage(value: 0)),
-        ActivityIndicatorButtonState(name: "Pasued", image: UIImage(named: "play")),
-        ActivityIndicatorButtonState(name: "Complete", tintColor: UIColor(red: 0.298, green: 0.686, blue: 0.314, alpha: 1.0), image: UIImage(named: "complete")),
-        ActivityIndicatorButtonState(name: "Error", tintColor: UIColor.redColor(), image: UIImage(named: "error"))
-    ]
+    var progressBarHidden: Bool = false {
+        didSet {
+            progressLabel.hidden = progressBarHidden
+            progressSlider.hidden = progressBarHidden
+        }
+    }
     
-    struct States {
-        static let Inactive = 0, Spinning = 1, ProgressBar = 2, Paused = 3, Complete = 4, Error = 5
+    
+    struct Names {
+        static let Inactive = "Inactive", Spinning = "Spinning", ProgressBar = "Progress Bar", Paused = "Paused", Complete = "Complete", Error = "Error"
+    }
+    
+    
+    func mapIdxForState(state: String) -> Int {
+        switch state {
+        case Names.Inactive: return 0
+        case Names.Spinning: return 1
+        case Names.ProgressBar: return 2
+        case Names.Paused: return 3
+        case Names.Complete: return 4
+        default: return 5
+        }
+    }
+    
+    func mapStateForIdx(idx: Int) -> String {
+        switch idx {
+        case 0: return Names.Inactive
+        case 1: return Names.Spinning
+        case 2: return Names.ProgressBar
+        case 3: return Names.Paused
+        case 4: return Names.Complete
+        default: return Names.Error
+        }
     }
     
     
@@ -60,31 +85,44 @@ class ViewController: UIViewController {
         
         self.activityIndicator.style = .Solid
         
+        self.activityIndicator.saveStates([
+            ActivityIndicatorButtonState(name: Names.Inactive, image: UIImage(named: "inactive")),
+            ActivityIndicatorButtonState(name: Names.Spinning, progressBarStyle: .Spinning),
+            ActivityIndicatorButtonState(name: Names.ProgressBar, image: UIImage(named: "paused"), progressBarStyle: .Percentage(value: 0)),
+            ActivityIndicatorButtonState(name: Names.Paused, image: UIImage(named: "play"), progressBarStyle: .Percentage(value: 0)),
+            ActivityIndicatorButtonState(name: Names.Complete, tintColor: UIColor(red:0.11, green:0.91, blue:0.71, alpha:1.0), image: UIImage(named: "complete")),
+            ActivityIndicatorButtonState(name: Names.Error, tintColor: UIColor(red:0.96, green:0.26, blue:0.21, alpha:1.0), image: UIImage(named: "error"))
+        ])
+        
         self.solidButtonSwitch.on = self.activityIndicator.style == .Solid
         self.progressSlider.value = 0
+        
+        activityIndicator.transitionSavedState(Names.Inactive, animated: false)
+        updateForPickerActivityState()
     }
     
     
     
     // MARK: Activity Button
     
-    func nextState(state: ActivityIndicatorButtonState) -> ActivityIndicatorButtonState {
-        switch state.name! {
-        case "Inactive":
-            return states[States.Spinning]
+    func nextState() {
+        switch activityIndicator.activityState.name! {
+        case Names.Inactive:
+            activityIndicator.transitionSavedState(Names.Spinning)
             
-        case "Spinning":
-            return states[States.ProgressBar]
+        case Names.Spinning:
+            activityIndicator.transitionSavedState(Names.ProgressBar)
             
-        case "Progress Bar":
-            return states[States.Paused]
+        case Names.ProgressBar:
+            activityIndicator.transitionSavedState(Names.Paused)
             
-        case "Paused":
-            return states[States.ProgressBar]
+        case Names.Paused:
+            activityIndicator.transitionSavedState(Names.ProgressBar)
             
         default:
-            return states[States.Inactive]
+            activityIndicator.transitionSavedState(Names.Inactive)
         }
+        updateForPickerActivityState()
     }
     
     @IBAction func touchDown(sender: AnyObject) {
@@ -114,7 +152,7 @@ class ViewController: UIViewController {
     @IBAction func touchUpInside(sender: AnyObject) {
         println("TOUCH UP INSIDE")
         
-        self.activityState = nextState(self.activityIndicator.activityState)
+        nextState()
     }
     
     @IBAction func touchUpOutside(sender: AnyObject) {
@@ -125,16 +163,13 @@ class ViewController: UIViewController {
     
     // MARK: Controls
     
-    var activityState: ActivityIndicatorButtonState {
-        get {
-            return self.activityIndicator.activityState
+    func updateForPickerActivityState() {
+        let idx = mapIdxForState(activityIndicator.activityState.name!)
+        if stateSelector.selectedRowInComponent(0) != idx {
+            stateSelector.selectRow(idx, inComponent: 0, animated: true)
         }
-        set {
-            self.activityIndicator.activityState = newValue
-            
-            var idx = find(states, activityState)!
-            self.stateSelector.selectRow(idx, inComponent: 0, animated: true)
-        }
+        
+        self.progressBarHidden = self.activityIndicator.activityState.name! != Names.ProgressBar
     }
     
     
@@ -143,10 +178,10 @@ class ViewController: UIViewController {
     }
     
     @IBAction func progressValueChanged(sender: UISlider) {
-        if activityIndicator.activityState.name == states[States.ProgressBar].name {
-            states[States.ProgressBar].setProgress(sender.value)
-            self.activityState = states[States.ProgressBar]
-        }
+        activityIndicator[Names.ProgressBar]?.setProgress(sender.value)
+        activityIndicator[Names.Paused]?.setProgress(sender.value)
+        
+        activityIndicator.transitionSavedState(Names.ProgressBar)
     }
 }
 
