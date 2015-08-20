@@ -46,6 +46,17 @@ private extension CGRect {
     }
 }
 
+private extension UIColor {
+    
+    func colorWithSaturation(sat: CGFloat) -> UIColor {
+        
+        var hue: CGFloat = 0, satOld: CGFloat = 0, bright: CGFloat = 0, alpha: CGFloat = 0
+        self.getHue(&hue, saturation: &satOld, brightness: &bright, alpha: &alpha)
+        
+        return UIColor(hue: hue, saturation: sat, brightness: bright, alpha: alpha)
+    }
+}
+
 
 
 
@@ -170,6 +181,13 @@ public class ActivityIndicatorButton: UIControl {
     
     
     // MARK: - Public API
+    
+    
+    public override var enabled: Bool {
+        didSet {
+            self.updateAllColors()
+        }
+    }
     
     
     
@@ -795,7 +813,14 @@ public class ActivityIndicatorButton: UIControl {
     }
     
     private func updateButtonColors() {
-        let tintColor = self.tintColorForCurrentActivityState
+        
+        var tintColor = self.tintColorForCurrentActivityState
+        var foregroundColor = self.foregroundColorForCurrentActivityState
+        
+        if !enabled {
+            tintColor = tintColor.colorWithSaturation(0.2)
+            foregroundColor = foregroundColor.colorWithSaturation(0.2)
+        }
         
         switch self.style {
         case .Outline:
@@ -805,17 +830,23 @@ public class ActivityIndicatorButton: UIControl {
             
         case .Solid:
             self.backgroundView.shapeLayer.fillColor = tintColor.CGColor
-            self.imageView.tintColor = foregroundColorForCurrentActivityState
+            self.imageView.tintColor = foregroundColor
             self.dropShadowLayer.shadowColor = self.shadowColor.CGColor
         }
     }
     
     private func updateTrackColors() {
-        let tintColor = self.tintColorForCurrentActivityState.CGColor
+        
+        var tintColor = self.tintColorForCurrentActivityState
+        
+        if !enabled {
+            tintColor = tintColor.colorWithSaturation(0.2)
+        }
+        
         let trackColor = self.trackColorForCurrentActivityState.CGColor
         let clear = UIColor.clearColor().CGColor
         
-        self.progressView.progressLayer.strokeColor = tintColor
+        self.progressView.progressLayer.strokeColor = tintColor.CGColor
         self.progressView.progressLayer.fillColor = clear
         
         self.backgroundView.shapeLayer.strokeColor = trackColor

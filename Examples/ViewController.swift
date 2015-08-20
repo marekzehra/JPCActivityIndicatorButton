@@ -41,6 +41,7 @@ class ViewController: UIViewController {
     
     @IBOutlet var stateSelector: UIPickerView!
     @IBOutlet var solidButtonSwitch: UISwitch!
+    @IBOutlet var enabledSwitch: UISwitch!
     @IBOutlet var progressLabel: UILabel!
     @IBOutlet var progressSlider: UISlider!
     
@@ -95,6 +96,7 @@ class ViewController: UIViewController {
         ])
         
         self.solidButtonSwitch.on = self.activityIndicator.style == .Solid
+        self.enabledSwitch.on = self.activityIndicator.enabled
         self.progressSlider.value = 0
         
         activityIndicator.transitionSavedState(Names.Inactive, animated: false)
@@ -175,6 +177,10 @@ class ViewController: UIViewController {
     
     @IBAction func solidButtonChanged(sender: UISwitch) {
         self.activityIndicator.style = sender.on ? .Solid : .Outline
+    }
+    
+    @IBAction func enabledValueChanged(sender: UISwitch) {
+        activityIndicator.enabled = sender.on
     }
     
     @IBAction func progressValueChanged(sender: UISlider) {
