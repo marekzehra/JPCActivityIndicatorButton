@@ -21,7 +21,7 @@ extension ViewController: UIPickerViewDataSource, UIPickerViewDelegate {
         return activityIndicator.savedStatesCount
     }
     
-    func pickerView(pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String! {
+    func pickerView(pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? {
         return activityIndicator[mapStateForIdx(row)]!.name!
     }
     
@@ -126,37 +126,37 @@ class ViewController: UIViewController {
     }
     
     @IBAction func touchDown(sender: AnyObject) {
-        println("TOUCH DOWN   WOO!")
+        print("TOUCH DOWN   WOO!")
     }
 
     @IBAction func touchDownRepeat(sender: AnyObject) {
-        println("TOUCH DOWN REPEAT  WOO! WOO!")
+        print("TOUCH DOWN REPEAT  WOO! WOO!")
     }
     
     @IBAction func touchDragInside(sender: AnyObject) {
-        println("TOUCH DRAG INSIDE")
+        print("TOUCH DRAG INSIDE")
     }
     
     @IBAction func touchDragOutside(sender: AnyObject) {
-        println("TOUCH DRAG OUTSIDE")
+        print("TOUCH DRAG OUTSIDE")
     }
     
     @IBAction func touchDragEnter(sender: AnyObject) {
-        println("TOUCH DRAG ENTER")
+        print("TOUCH DRAG ENTER")
     }
     
     @IBAction func touchDragExit(sender: AnyObject) {
-        println("TOUCH DRAG EXIT")
+        print("TOUCH DRAG EXIT")
     }
     
     @IBAction func touchUpInside(sender: AnyObject) {
-        println("TOUCH UP INSIDE")
+        print("TOUCH UP INSIDE")
         
         nextState()
     }
     
     @IBAction func touchUpOutside(sender: AnyObject) {
-        println("TOUCH UP OUTSIDE")
+        print("TOUCH UP OUTSIDE")
     }
 
     

@@ -97,12 +97,12 @@ public struct ActivityIndicatorButtonState: Equatable {
     /**
     Default initializer. No properties are required. All have default values.
     
-    :param: name             Default value is nil
-    :param: tintColor        Default value is nil
-    :param: trackColor       Default value is nil
-    :param: foregroundColor  Default value is nil
-    :param: image            Default value is nil
-    :param: progressBarStyle Default value is .Inactive
+    - parameter name:             Default value is nil
+    - parameter tintColor:        Default value is nil
+    - parameter trackColor:       Default value is nil
+    - parameter foregroundColor:  Default value is nil
+    - parameter image:            Default value is nil
+    - parameter progressBarStyle: Default value is .Inactive
     */
     public init(name: String? = nil, tintColor: UIColor? = nil, trackColor: UIColor? = nil, foregroundColor: UIColor? = nil, image: UIImage? = nil, progressBarStyle: ActivityIndicatorButtonProgressBarStyle = .Inactive) {
         self.name = name
@@ -359,9 +359,9 @@ public class ActivityIndicatorButton: UIControl {
     /**
     Store an ActivityIndicatorButtonState for simple access
     
-    :param: name The key used to store the state. It doesn't have to be equal to state.name but it is probably good practice. For this API the name property on state is not required.
+    - parameter name: The key used to store the state. It doesn't have to be equal to state.name but it is probably good practice. For this API the name property on state is not required.
     
-    :returns: The ActivityIndicatorButtonState or nil if a saved state could not be found.
+    - returns: The ActivityIndicatorButtonState or nil if a saved state could not be found.
     */
     public subscript (name: String) -> ActivityIndicatorButtonState? {
         get {
@@ -375,7 +375,7 @@ public class ActivityIndicatorButton: UIControl {
     /**
     Convenience API for saving a group of states.
     
-    :param: states An array of states. The name property MUST be set.  If not an assertion is triggered.  The states are keyed based on the value of "name".
+    - parameter states: An array of states. The name property MUST be set.  If not an assertion is triggered.  The states are keyed based on the value of "name".
     */
     public func saveStates(states: [ActivityIndicatorButtonState]) {
         for aState in states {
@@ -387,10 +387,10 @@ public class ActivityIndicatorButton: UIControl {
     /**
     Convenience API for setting a saved state. Equivalent to button.activityState = button["name of state"]
     
-    :param: name     The key used to access the saved state
-    :param: animated If animated is desired
+    - parameter name:     The key used to access the saved state
+    - parameter animated: If animated is desired
     
-    :returns: True is the state was found in saved states. 
+    - returns: True is the state was found in saved states. 
     */
     public func transitionSavedState(name: String, animated: Bool = true) -> Bool {
         if let state = self[name] {
@@ -413,7 +413,7 @@ public class ActivityIndicatorButton: UIControl {
         commonInit()
     }
     
-    public required init(coder aDecoder: NSCoder) {
+    public required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
         commonInit()
     }
@@ -469,7 +469,7 @@ public class ActivityIndicatorButton: UIControl {
     /**
     Does the real work of transitioning from one ActivityState to the next. If previous state is set will also update out of that state.
     */
-    private func updateForNextActivityState(#animated: Bool) {
+    private func updateForNextActivityState(animated animated: Bool) {
 
         struct DisplayState {
             let trackVisible: Bool
@@ -492,8 +492,8 @@ public class ActivityIndicatorButton: UIControl {
         var prevDisplayState = DisplayState(
             trackVisible: backgroundView.shapeLayer.opacity > 0.5,
             progressBarVisible: progressView.progressLayer.opacity > 0.5,
-            tintColor: UIColor(CGColor: self.style == .Solid ? backgroundView.shapeLayer.fillColor : backgroundView.shapeLayer.strokeColor)!,
-            trackColor: UIColor(CGColor: backgroundView.shapeLayer.strokeColor)!,
+            tintColor: UIColor(CGColor: (self.style == .Solid ? backgroundView.shapeLayer.fillColor : backgroundView.shapeLayer.strokeColor)!),
+            trackColor: UIColor(CGColor: backgroundView.shapeLayer.strokeColor!),
             image: imageView.image,
             progressBarStyle: renderedActivityState != nil ? renderedActivityState!.progressBarStyle : .Inactive)
 
@@ -944,9 +944,9 @@ public class ActivityIndicatorButton: UIControl {
     */
     private func initialLayoutSetup() {
 
-        self.imageView.setTranslatesAutoresizingMaskIntoConstraints(false)
-        self.backgroundView.setTranslatesAutoresizingMaskIntoConstraints(false)
-        self.progressView.setTranslatesAutoresizingMaskIntoConstraints(false)
+        self.imageView.translatesAutoresizingMaskIntoConstraints = false
+        self.backgroundView.translatesAutoresizingMaskIntoConstraints = false
+        self.progressView.translatesAutoresizingMaskIntoConstraints = false
         
         self.imageView.backgroundColor = UIColor.clearColor()
         self.backgroundView.backgroundColor = UIColor.clearColor()
@@ -965,8 +965,8 @@ public class ActivityIndicatorButton: UIControl {
         let views = ["progress" : self.progressView]
         let metrics: [String : NSNumber] = ["OUTER" : Constants.Layout.outerPadding]
         
-        self.addConstraints(NSLayoutConstraint.constraintsWithVisualFormat("H:|-(OUTER)-[progress]-(OUTER)-|", options: NSLayoutFormatOptions.allZeros, metrics: metrics, views: views))
-        self.addConstraints(NSLayoutConstraint.constraintsWithVisualFormat("V:|-(OUTER)-[progress]-(OUTER)-|", options: NSLayoutFormatOptions.allZeros, metrics: metrics, views: views))
+        self.addConstraints(NSLayoutConstraint.constraintsWithVisualFormat("H:|-(OUTER)-[progress]-(OUTER)-|", options: NSLayoutFormatOptions(), metrics: metrics, views: views))
+        self.addConstraints(NSLayoutConstraint.constraintsWithVisualFormat("V:|-(OUTER)-[progress]-(OUTER)-|", options: NSLayoutFormatOptions(), metrics: metrics, views: views))
 
         self.addConstraint(NSLayoutConstraint(item: self.imageView, attribute: .CenterX, relatedBy: .Equal, toItem: self, attribute: .CenterX, multiplier: 1.0, constant: 0.0))
         self.addConstraint(NSLayoutConstraint(item: self.imageView, attribute: .CenterY, relatedBy: .Equal, toItem: self, attribute: .CenterY, multiplier: 1.0, constant: 0.0))
@@ -998,8 +998,8 @@ public class ActivityIndicatorButton: UIControl {
         // The "INNER" padding is the distance between the bounds and the track. Have to add the width of the progress and the half of the track (the track is the stroke of the background view)
         let metrics: [String : NSNumber] = ["INNER" : Constants.Layout.outerPadding + progressBarWidth + 0.5 * trackWidth]
         
-        buttonConstraints += NSLayoutConstraint.constraintsWithVisualFormat("H:|-(INNER)-[bg]-(INNER)-|", options: NSLayoutFormatOptions.allZeros, metrics: metrics, views: views) as! [NSLayoutConstraint]
-        buttonConstraints += NSLayoutConstraint.constraintsWithVisualFormat("V:|-(INNER)-[bg]-(INNER)-|", options: NSLayoutFormatOptions.allZeros, metrics: metrics, views: views) as! [NSLayoutConstraint]
+        buttonConstraints += NSLayoutConstraint.constraintsWithVisualFormat("H:|-(INNER)-[bg]-(INNER)-|", options: NSLayoutFormatOptions(), metrics: metrics, views: views) 
+        buttonConstraints += NSLayoutConstraint.constraintsWithVisualFormat("V:|-(INNER)-[bg]-(INNER)-|", options: NSLayoutFormatOptions(), metrics: metrics, views: views) 
         
         self.addConstraints(buttonConstraints)
     }
@@ -1110,8 +1110,8 @@ public class ActivityIndicatorButton: UIControl {
         fadeAnim.fromValue = 1.0
         fadeAnim.toValue = 0.0
 
-        scaleLayer(self.backgroundView.layer, 0.0)
-        scaleLayer(self.dropShadowLayer, 0.0)
+        scaleLayer(self.backgroundView.layer, offset: 0.0)
+        scaleLayer(self.dropShadowLayer, offset: 0.0)
 
         let group = CAAnimationGroup()
         group.animations = [pathAnim, fadeAnim]
