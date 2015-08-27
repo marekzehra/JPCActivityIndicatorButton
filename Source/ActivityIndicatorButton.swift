@@ -1024,6 +1024,7 @@ public class ActivityIndicatorButton: UIControl {
         
         // Clear old constraints
         self.removeConstraints(buttonConstraints)
+        buttonConstraints.removeAll()
         
         let views = ["bg" : self.backgroundView]
         // The "INNER" padding is the distance between the bounds and the track. Have to add the width of the progress and the half of the track (the track is the stroke of the background view)
