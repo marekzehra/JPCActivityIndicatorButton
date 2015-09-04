@@ -636,6 +636,9 @@ public class ActivityIndicatorButton: UIControl {
         }
         
         
+        // Update the image constraints
+        updateButtonConstains()
+        
         // Finally update our current activity state
         self.renderedActivityState = activityState
     }
@@ -646,7 +649,6 @@ public class ActivityIndicatorButton: UIControl {
         switch self.activityState.progressBarStyle {
         case .Percentage(let value):
             
-//            debugPrintln("PROGRESS: \(value)")
             if animated {
                 let anim = CABasicAnimation(keyPath: "strokeEnd")
                 anim.fromValue = prevValue
@@ -936,6 +938,10 @@ public class ActivityIndicatorButton: UIControl {
         }
     }
     
+    // The "INNER" padding is the distance between the background and the track. Have to add the width of the progress and the half of the track (the track is the stroke of the background view)
+    private var innerPadding: CGFloat {
+        return Constants.Layout.outerPadding + progressBarWidth + 0.5 * trackWidth
+    }
 
     private var buttonConstraints = [NSLayoutConstraint]()
     
@@ -987,19 +993,22 @@ public class ActivityIndicatorButton: UIControl {
     }
     
     /**
-    The button constraints may change is progress bar or track width is changed. This method will handle updates
+    The button constraints may change if progress bar or track width is changed. This method will handle updates
     */
     private func updateButtonConstains() {
         
         // Clear old constraints
         self.removeConstraints(buttonConstraints)
+        buttonConstraints.removeAll()
         
-        let views = ["bg" : self.backgroundView]
-        // The "INNER" padding is the distance between the bounds and the track. Have to add the width of the progress and the half of the track (the track is the stroke of the background view)
-        let metrics: [String : NSNumber] = ["INNER" : Constants.Layout.outerPadding + progressBarWidth + 0.5 * trackWidth]
+        let views = ["bg" : self.backgroundView, "image" : imageView]
+        let metrics: [String : NSNumber] = ["INNER" : innerPadding, "IMAGE_PAD" : innerPadding + minimumImagePadding]
         
         buttonConstraints += NSLayoutConstraint.constraintsWithVisualFormat("H:|-(INNER)-[bg]-(INNER)-|", options: NSLayoutFormatOptions.allZeros, metrics: metrics, views: views) as! [NSLayoutConstraint]
         buttonConstraints += NSLayoutConstraint.constraintsWithVisualFormat("V:|-(INNER)-[bg]-(INNER)-|", options: NSLayoutFormatOptions.allZeros, metrics: metrics, views: views) as! [NSLayoutConstraint]
+        
+        buttonConstraints += NSLayoutConstraint.constraintsWithVisualFormat("H:|-(IMAGE_PAD)-[image]-(IMAGE_PAD)-|", options: NSLayoutFormatOptions.allZeros, metrics: metrics, views: views) as! [NSLayoutConstraint]
+        buttonConstraints += NSLayoutConstraint.constraintsWithVisualFormat("V:|-(IMAGE_PAD)-[image]-(IMAGE_PAD)-|", options: NSLayoutFormatOptions.allZeros, metrics: metrics, views: views) as! [NSLayoutConstraint]
         
         self.addConstraints(buttonConstraints)
     }

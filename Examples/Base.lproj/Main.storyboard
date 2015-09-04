@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="7706" systemVersion="14E46" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="BYZ-38-t0r">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="7706" systemVersion="14F27" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="BYZ-38-t0r">
     <dependencies>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="7703"/>
         <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
@@ -52,6 +52,12 @@
                                 <rect key="frame" x="272" y="40" width="56" height="56"/>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                 <color key="tintColor" red="0.0" green="0.72156862745098038" blue="0.83137254901960778" alpha="1" colorSpace="calibratedRGB"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="34" id="6Jl-gw-HTe"/>
+                                    <constraint firstAttribute="height" constant="34" id="JEy-iI-LUA"/>
+                                    <constraint firstAttribute="width" constant="34" id="WA7-lV-3uR"/>
+                                    <constraint firstAttribute="height" constant="34" id="ZtX-HU-azL"/>
+                                </constraints>
                                 <userDefinedRuntimeAttributes>
                                     <userDefinedRuntimeAttribute type="image" keyPath="image" value="inactive"/>
                                     <userDefinedRuntimeAttribute type="color" keyPath="normalForegroundColor">
@@ -61,6 +67,14 @@
                                         <color key="value" red="0.36171291388038063" green="0.36532299228735787" blue="0.38672555827886712" alpha="1" colorSpace="calibratedRGB"/>
                                     </userDefinedRuntimeAttribute>
                                 </userDefinedRuntimeAttributes>
+                                <variation key="default">
+                                    <mask key="constraints">
+                                        <exclude reference="6Jl-gw-HTe"/>
+                                        <exclude reference="JEy-iI-LUA"/>
+                                        <exclude reference="WA7-lV-3uR"/>
+                                        <exclude reference="ZtX-HU-azL"/>
+                                    </mask>
+                                </variation>
                                 <connections>
                                     <action selector="touchDown:" destination="BYZ-38-t0r" eventType="touchDown" id="yMY-KN-gYy"/>
                                     <action selector="touchDownRepeat:" destination="BYZ-38-t0r" eventType="touchDownRepeat" id="eIW-hI-Jyp"/>
