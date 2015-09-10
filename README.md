@@ -24,7 +24,7 @@ It is a drop in replacement for UIActivityIndicatorView and UIProgressView that 
 
 ``` ruby
 use_frameworks!
-pod 'JPCActivityIndicatorButton'
+pod 'JPCActivityIndicatorButton', :git => 'https://github.com/jpchmura/JPCActivityIndicatorButton.git', :branch => 'swift-2.0'
 ```
 
 ### Manual
