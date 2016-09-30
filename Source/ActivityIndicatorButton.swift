@@ -922,7 +922,7 @@ public class ActivityIndicatorButton: UIControl {
 
     private func setImage(image: UIImage?) {
         self.imageView.image = image
-        self.imageView.sizeToFit()
+        self.imageView.contentMode = .Center
     }
 
 
