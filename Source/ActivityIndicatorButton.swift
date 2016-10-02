@@ -338,7 +338,7 @@ public class ActivityIndicatorButton: UIControl {
     /// The width of the circular progress bar / activity indicator
     @IBInspectable public var progressBarWidth: CGFloat = 3 {
         didSet {
-            self.updateButtonConstains()
+            //self.updateButtonConstains()
             self.updateForCurrentBounds()
         }
     }
@@ -346,7 +346,7 @@ public class ActivityIndicatorButton: UIControl {
     /// The width of the track outline separating the progress bar from the button
     @IBInspectable public var trackWidth: CGFloat = 1.5 {
         didSet {
-            self.updateButtonConstains()
+            //self.updateButtonConstains()
             self.updateForCurrentBounds()
         }
     }
@@ -354,7 +354,7 @@ public class ActivityIndicatorButton: UIControl {
     /// The minimum amount of padding between the image and the side of the button
     @IBInspectable public var minimumImagePadding: CGFloat = 5 {
         didSet {
-            self.updateButtonConstains()
+            //self.updateButtonConstains()
             self.updateForCurrentBounds()
         }
     }
@@ -447,8 +447,8 @@ public class ActivityIndicatorButton: UIControl {
         updateForNextActivityState(animated: false)
         
         // Observe touch down and up for fire ripple animations
-        self.addTarget(self, action: "handleTouchUp:", forControlEvents: .TouchUpInside)
-        self.addTarget(self, action: "handleTouchDown:", forControlEvents: .TouchDown)
+        self.addTarget(self, action: #selector(ActivityIndicatorButton.handleTouchUp(_:)), forControlEvents: .TouchUpInside)
+        self.addTarget(self, action: #selector(ActivityIndicatorButton.handleTouchDown(_:)), forControlEvents: .TouchDown)
     }
     
     
@@ -655,7 +655,7 @@ public class ActivityIndicatorButton: UIControl {
         
         
         // Update the image constraints
-        updateButtonConstains()
+        //updateButtonConstains()
         
         // Finally update our current activity state
         self.renderedActivityState = activityState
@@ -904,6 +904,18 @@ public class ActivityIndicatorButton: UIControl {
         
     }
     
+    private class StopView: UIView {
+        var stopLayer: CAShapeLayer {
+            get {
+                return self.layer as! CAShapeLayer
+            }
+        }
+        
+        override class func layerClass() -> AnyClass {
+            return CAShapeLayer.self
+        }
+    }
+    
     /// The layer from which to draw the button shadow
     private var dropShadowLayer: CALayer {
         get {
@@ -918,17 +930,14 @@ public class ActivityIndicatorButton: UIControl {
     private lazy var backgroundView: BackgroundView = BackgroundView()
     
     private lazy var progressView: ProgressView = ProgressView()
+    
+    private lazy var stopView: StopView = StopView()
 
 
     private func setImage(image: UIImage?) {
         self.imageView.image = image
         self.imageView.contentMode = .Center
     }
-
-
-
-
-
 
 
     // MARK: - Layout
@@ -969,6 +978,12 @@ public class ActivityIndicatorButton: UIControl {
         }
     }
     
+    private var stopViewPath: CGPath {
+        get {
+            return UIBezierPath(rect: CGRectMake(self.stopView.frame.width*0.5-5, self.stopView.frame.height*0.5-5, 10, 10)).CGPath
+        }
+    }
+    
     // The "INNER" padding is the distance between the background and the track. Have to add the width of the progress and the half of the track (the track is the stroke of the background view)
     private var innerPadding: CGFloat {
         return Constants.Layout.outerPadding + progressBarWidth + 0.5 * trackWidth
@@ -984,36 +999,47 @@ public class ActivityIndicatorButton: UIControl {
         self.imageView.translatesAutoresizingMaskIntoConstraints = false
         self.backgroundView.translatesAutoresizingMaskIntoConstraints = false
         self.progressView.translatesAutoresizingMaskIntoConstraints = false
+        self.stopView.translatesAutoresizingMaskIntoConstraints = false
         
         self.imageView.backgroundColor = UIColor.clearColor()
         self.backgroundView.backgroundColor = UIColor.clearColor()
         self.progressView.backgroundColor = UIColor.clearColor()
+        self.stopView.backgroundColor = UIColor.clearColor()
         
         self.imageView.userInteractionEnabled = false
         self.backgroundView.userInteractionEnabled = false
         self.progressView.userInteractionEnabled = false
+        self.stopView.userInteractionEnabled = false
         
         self.backgroundColor = UIColor.clearColor()
         
         self.addSubview(self.backgroundView)
         self.addSubview(self.imageView)
         self.addSubview(self.progressView)
+        self.addSubview(self.stopView)
 
-        let views = ["progress" : self.progressView]
+        let views = ["progress" : self.progressView, "image" : self.imageView, "stop" : self.stopView]
         let metrics: [String : NSNumber] = ["OUTER" : Constants.Layout.outerPadding]
         
         self.addConstraints(NSLayoutConstraint.constraintsWithVisualFormat("H:|-(OUTER)-[progress]-(OUTER)-|", options: NSLayoutFormatOptions(), metrics: metrics, views: views))
         self.addConstraints(NSLayoutConstraint.constraintsWithVisualFormat("V:|-(OUTER)-[progress]-(OUTER)-|", options: NSLayoutFormatOptions(), metrics: metrics, views: views))
-
-        self.addConstraint(NSLayoutConstraint(item: self.imageView, attribute: .CenterX, relatedBy: .Equal, toItem: self, attribute: .CenterX, multiplier: 1.0, constant: 0.0))
-        self.addConstraint(NSLayoutConstraint(item: self.imageView, attribute: .CenterY, relatedBy: .Equal, toItem: self, attribute: .CenterY, multiplier: 1.0, constant: 0.0))
         
-        updateButtonConstains()
+        self.addConstraints(NSLayoutConstraint.constraintsWithVisualFormat("H:|-(OUTER)-[image]-(OUTER)-|", options: NSLayoutFormatOptions(), metrics: metrics, views: views))
+        self.addConstraints(NSLayoutConstraint.constraintsWithVisualFormat("V:|-(OUTER)-[image]-(OUTER)-|", options: NSLayoutFormatOptions(), metrics: metrics, views: views))
+        
+        self.addConstraints(NSLayoutConstraint.constraintsWithVisualFormat("H:|-(OUTER)-[stop]-(OUTER)-|", options: NSLayoutFormatOptions(), metrics: metrics, views: views))
+        self.addConstraints(NSLayoutConstraint.constraintsWithVisualFormat("V:|-(OUTER)-[stop]-(OUTER)-|", options: NSLayoutFormatOptions(), metrics: metrics, views: views))
+
+        //self.addConstraint(NSLayoutConstraint(item: self.imageView, attribute: .CenterX, relatedBy: .Equal, toItem: self, attribute: .CenterX, multiplier: 1.0, constant: 0.0))
+        //self.addConstraint(NSLayoutConstraint(item: self.imageView, attribute: .CenterY, relatedBy: .Equal, toItem: self, attribute: .CenterY, multiplier: 1.0, constant: 0.0))
+        
+        //updateButtonConstains()
         
         // Set up imageViewMask
         
         self.imageViewMask.fillColor = UIColor.whiteColor().CGColor
         self.imageView.layer.mask = self.imageViewMask
+        self.imageView.contentMode = .Center
         
         // Set up drop shadow
         let layer = self.dropShadowLayer
@@ -1038,8 +1064,8 @@ public class ActivityIndicatorButton: UIControl {
         buttonConstraints += NSLayoutConstraint.constraintsWithVisualFormat("H:|-(INNER)-[bg]-(INNER)-|", options: NSLayoutFormatOptions(), metrics: metrics, views: views) 
         buttonConstraints += NSLayoutConstraint.constraintsWithVisualFormat("V:|-(INNER)-[bg]-(INNER)-|", options: NSLayoutFormatOptions(), metrics: metrics, views: views) 
         
-        buttonConstraints += NSLayoutConstraint.constraintsWithVisualFormat("H:|-(IMAGE_PAD)-[image]-(IMAGE_PAD)-|", options: NSLayoutFormatOptions(), metrics: metrics, views: views)
-        buttonConstraints += NSLayoutConstraint.constraintsWithVisualFormat("V:|-(IMAGE_PAD)-[image]-(IMAGE_PAD)-|", options: NSLayoutFormatOptions(), metrics: metrics, views: views)
+        //buttonConstraints += NSLayoutConstraint.constraintsWithVisualFormat("H:|-(IMAGE_PAD)-[image]-(IMAGE_PAD)-|", options: NSLayoutFormatOptions(), metrics: metrics, views: views)
+        //buttonConstraints += NSLayoutConstraint.constraintsWithVisualFormat("V:|-(IMAGE_PAD)-[image]-(IMAGE_PAD)-|", options: NSLayoutFormatOptions(), metrics: metrics, views: views)
         
         self.addConstraints(buttonConstraints)
     }
