@@ -1024,14 +1024,14 @@ public class ActivityIndicatorButton: UIControl {
         self.addConstraints(NSLayoutConstraint.constraintsWithVisualFormat("H:|-(OUTER)-[progress]-(OUTER)-|", options: NSLayoutFormatOptions(), metrics: metrics, views: views))
         self.addConstraints(NSLayoutConstraint.constraintsWithVisualFormat("V:|-(OUTER)-[progress]-(OUTER)-|", options: NSLayoutFormatOptions(), metrics: metrics, views: views))
         
-        self.addConstraints(NSLayoutConstraint.constraintsWithVisualFormat("H:|-(OUTER)-[image]-(OUTER)-|", options: NSLayoutFormatOptions(), metrics: metrics, views: views))
-        self.addConstraints(NSLayoutConstraint.constraintsWithVisualFormat("V:|-(OUTER)-[image]-(OUTER)-|", options: NSLayoutFormatOptions(), metrics: metrics, views: views))
+        //self.addConstraints(NSLayoutConstraint.constraintsWithVisualFormat("H:|-(OUTER)-[image]-(OUTER)-|", options: NSLayoutFormatOptions(), metrics: metrics, views: views))
+        //self.addConstraints(NSLayoutConstraint.constraintsWithVisualFormat("V:|-(OUTER)-[image]-(OUTER)-|", options: NSLayoutFormatOptions(), metrics: metrics, views: views))
         
-        self.addConstraints(NSLayoutConstraint.constraintsWithVisualFormat("H:|-(OUTER)-[stop]-(OUTER)-|", options: NSLayoutFormatOptions(), metrics: metrics, views: views))
-        self.addConstraints(NSLayoutConstraint.constraintsWithVisualFormat("V:|-(OUTER)-[stop]-(OUTER)-|", options: NSLayoutFormatOptions(), metrics: metrics, views: views))
+        //self.addConstraints(NSLayoutConstraint.constraintsWithVisualFormat("H:|-(OUTER)-[stop]-(OUTER)-|", options: NSLayoutFormatOptions(), metrics: metrics, views: views))
+        //self.addConstraints(NSLayoutConstraint.constraintsWithVisualFormat("V:|-(OUTER)-[stop]-(OUTER)-|", options: NSLayoutFormatOptions(), metrics: metrics, views: views))
 
-        //self.addConstraint(NSLayoutConstraint(item: self.imageView, attribute: .CenterX, relatedBy: .Equal, toItem: self, attribute: .CenterX, multiplier: 1.0, constant: 0.0))
-        //self.addConstraint(NSLayoutConstraint(item: self.imageView, attribute: .CenterY, relatedBy: .Equal, toItem: self, attribute: .CenterY, multiplier: 1.0, constant: 0.0))
+        self.addConstraint(NSLayoutConstraint(item: self.imageView, attribute: .CenterX, relatedBy: .Equal, toItem: self, attribute: .CenterX, multiplier: 1.0, constant: 0.0))
+        self.addConstraint(NSLayoutConstraint(item: self.imageView, attribute: .CenterY, relatedBy: .Equal, toItem: self, attribute: .CenterY, multiplier: 1.0, constant: 0.0))
         
         //updateButtonConstains()
         
